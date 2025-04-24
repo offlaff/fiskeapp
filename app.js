@@ -12,14 +12,7 @@ const session = require("express-session");
 const flash = require("express-flash");
 const SQLiteStore = require("connect-sqlite3")(session);
 const pinRoutes = require("./routes/pins");
-
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use(pinRoutes);
+var cookieParser = require("cookie-parser");
 
 app.use(
   session({
@@ -29,11 +22,18 @@ app.use(
     store: new SQLiteStore(),
   })
 );
-
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
+// app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use(pinRoutes);
+
+app.use(cookieParser());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 

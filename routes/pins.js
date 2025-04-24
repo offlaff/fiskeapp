@@ -1,8 +1,9 @@
 const express = require("express");
 const db = require("../db");
+const passport = require("passport");
 const router = express.Router();
 
-router.post("/add-pins", async (req, res) => {
+router.post("/add-pins", isLoggedIn, async (req, res) => {
   const { lat, lng, length, weight } = req.body;
   console.log({ lat, lng, length, weight });
   const result = await db.pins.create({
@@ -19,5 +20,13 @@ router.get("/pins", async (req, res) => {
   console.log(result);
   res.json(result[0]);
 });
+
+function isLoggedIn(req, res, next) {
+  if (req.user) {
+    return next();
+  }
+  console.log(req.user);
+  res.redirect("/login");
+}
 
 module.exports = router;

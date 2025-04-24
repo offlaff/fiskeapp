@@ -18,10 +18,13 @@ async function initMap() {
     draggable: false,
     icon: icon,
   });
-  map.addListener("click", (event) => {
-    console.log(event);
-    addPin(event.latLng);
-  });
+  console.log(window.location.href);
+  if (window.location.href.endsWith("/add-pins")) {
+    map.addListener("click", (event) => {
+      console.log(event);
+      addPin(event.latLng);
+    });
+  }
 
   fetch("/pins")
     .then((a) => {
@@ -67,6 +70,9 @@ async function savePinToDatabase(lat, lng, length, weight) {
   try {
     const response = await fetch("http://localhost:3000/add-pins", {
       method: "POST",
+      credentials: "same-origin",
+      mode: "cors",
+      cache: "no-cache",
       headers: {
         "Content-Type": "application/json",
       },
