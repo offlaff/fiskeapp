@@ -8,10 +8,34 @@ async function initMap() {
     center: { lat: 59.45682691867532, lng: 6.381019482012794 },
     zoom: 15.5,
   });
+  const icon = {
+    url: "/balkong.jpg",
+    scaledSize: new google.maps.Size(20, 20),
+  };
+  const kleivaholen = new google.maps.Marker({
+    position: new google.maps.LatLng(59.45516506545786, 6.397122390604384),
+    map: map,
+    draggable: false,
+    icon: icon,
+  });
   map.addListener("click", (event) => {
     console.log(event);
     addPin(event.latLng);
   });
+
+  fetch("/pins")
+    .then((a) => {
+      return a.json();
+    })
+    .then((result) => {
+      result.forEach((pin) => {
+        const marker = new google.maps.Marker({
+          position: new google.maps.LatLng(pin.latitude, pin.longitude),
+          map: map,
+          draggable: true,
+        });
+      });
+    });
 }
 
 function addPin(location) {
@@ -38,7 +62,7 @@ function addPin(location) {
   });
   savePinToDatabase(location.lat(), location.lng(), length, weight);
 }
-
+//
 async function savePinToDatabase(lat, lng, length, weight) {
   try {
     const response = await fetch("http://localhost:3000/add-pins", {

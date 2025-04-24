@@ -54,19 +54,19 @@ app.post(
   })
 );
 
-app.post("/add-pins", isLoggedIn, (req, res) => {
-  const { lat, lng, length, weight } = req.body;
-  console.log(lat, lng, length, weight);
-  const query =
-    "INSERT INTO pins (latitude, longitude, length, weight) VALUES (?, ?, ?, ?)";
-  db.query(query, [lat, lng, length, weight], (err, result) => {
-    if (err) {
-      console.error("Error inserting pin:", err);
-      return res.status(500).send("Error saving pin");
-    }
-    res.send({ success: true, id: result.insertId });
-  });
-});
+// app.post("/add-pins", isLoggedIn, (req, res) => {
+//   const { lat, lng, length, weight } = req.body;
+//   console.log(lat, lng, length, weight);
+//   const query =
+//     "INSERT INTO pins (latitude, longitude, length, weight) VALUES (?, ?, ?, ?)";
+//   db.query(query, [lat, lng, length, weight], (err, result) => {
+//     if (err) {
+//       console.error("Error inserting pin:", err);
+//       return res.status(500).send("Error saving pin");
+//     }
+//     res.send({ success: true, id: result.insertId });
+//   });
+// });
 // gjer om te sequelize og fiks bug
 app.get("/api/pins", (req, res) => {
   db.query("SELECT * FROM pins", (err, results) => {
