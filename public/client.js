@@ -43,6 +43,9 @@ async function initMap() {
 
 function addPin(location) {
   const length = parseFloat(prompt("Lengde på fisk:"));
+  if (!length) {
+    return;
+  }
   const weight = parseFloat(prompt("Vekt på fisk:"));
   if (Number.isNaN(length) || Number.isNaN(weight)) return;
 
