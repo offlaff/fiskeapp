@@ -1,85 +1,182 @@
-let map;
 let pins = [];
+let map = null;
+let templocation = 0;
+const zoomLevel = 15.5;
+let markers = [];
+let user = null;
 
-async function initMap() {
-  const { Map } = await google.maps.importLibrary("maps");
+function initMap() {
+  map = L.map("map", {
+    zoomControl: false,
+  }).setView([59.456599116158394, 6.3862352690536195], zoomLevel);
+  map.touchZoom.disable();
+  map.doubleClickZoom.disable();
+  map.scrollWheelZoom.disable();
+  map.boxZoom.disable();
+  map.keyboard.disable();
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution:
+      '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(map);
+  executeSearch();
+  map.on("click", onMapClick);
+}
+initMap();
 
-  map = new Map(document.getElementById("map"), {
-    center: { lat: 59.45682691867532, lng: 6.381019482012794 },
-    zoom: 15.5,
+async function getMe() {
+  const response = await fetch("/users/me", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
   });
-  const icon = {
-    url: "/balkong.jpg",
-    scaledSize: new google.maps.Size(20, 20),
-  };
-  const kleivaholen = new google.maps.Marker({
-    position: new google.maps.LatLng(59.45516506545786, 6.397122390604384),
-    map: map,
-    draggable: false,
-    icon: icon,
-  });
-  console.log(window.location.href);
-  if (window.location.href.endsWith("/add-pins")) {
-    map.addListener("click", (event) => {
-      console.log(event);
-      addPin(event.latLng);
-    });
+  const data = await response.json();
+  console.log(data);
+  if (data.username) {
+    user = data;
+  } else {
+    console.log("is not logged in");
   }
-
+}
+getMe();
+function getPins() {
   fetch("/pins")
     .then((a) => {
       return a.json();
     })
     .then((result) => {
-      result.forEach((pin) => {
-        const marker = new google.maps.Marker({
-          position: new google.maps.LatLng(pin.latitude, pin.longitude),
-          map: map,
-          draggable: true,
-        });
-      });
+      pins = result;
+      onGotPins();
     });
 }
 
-function addPin(location) {
-  const length = parseFloat(prompt("Lengde på fisk:"));
-  if (!length) {
+function onGotPins() {
+  pins.forEach((pin) => {
+    addMarker(pin);
+    addTableRow(pin);
+  });
+}
+
+function addTableRow(pin) {
+  console.log(pin);
+
+  const table = document.getElementById("salmon-table-body");
+  const editButton = `<a href="/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn loggedIn" data-id="${pin.id}">Rediger</a>`;
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${pin.name}</td>
+    <td>${pin.weight}</td>
+    <td>${pin.length}</td>
+    <td>${pin.bait}</td>
+    <td>${pin.date}</td>
+    <td class="loggedIn">${editButton}</td>
+  `;
+  table.appendChild(row);
+}
+
+document.getElementById("salmon-table-body").addEventListener("click", (e) => {
+  const clickedEle = e.target;
+  if (clickedEle.matches("button.edit-btn")) {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
+    const pinId = clickedEle.dataset.id;
+    window.location.href = `/edit/${pinId}`;
+  }
+});
+
+function addMarker(pin) {
+  const marker = L.marker([pin.latitude, pin.longitude]).addTo(map);
+  const markerIcon = marker.options.icon;
+  const iconSize = 20;
+  markerIcon.options.shadowSize = [0, 0];
+  markerIcon.options.iconAnchor = [9, 20];
+  markerIcon.options.iconSize = [iconSize * 0.7, iconSize];
+  marker.setIcon(markerIcon);
+  console.log(marker);
+  markers.push(marker);
+  marker.bindPopup(
+    `🐟 Lengde: ${pin.length} <br> Vekt: ${pin.weight}
+     <br> Agn: ${pin.bait} 
+     <br> Fisker: ${pin.name} 
+     <br> Dato: ${pin.date}
+     <br> <a href ="/images/${pin.image}" target="_blank">
+     <img style="width: 100px; height: 100px; object-fit: contain;" src="/images/${pin.image}">
+     </a>`
+  );
+}
+
+let tempLocation = null;
+
+function onMapClick(location) {
+  if (!user) {
     return;
   }
-  const weight = parseFloat(prompt("Vekt på fisk:"));
-  if (Number.isNaN(length) || Number.isNaN(weight)) return;
+  tempLocation = location.latlng;
 
-  // lag alerts hvis input er feil
-
-  if (length === null || weight === null) return;
-  const marker = new google.maps.Marker({
-    position: location,
-    map: map,
-    draggable: true,
-  });
-  const infoWindow = new google.maps.InfoWindow();
-  marker.addListener("click", () => {
-    infoWindow.close();
-    infoWindow.setContent(marker.getTitle());
-    infoWindow.open(marker.getMap(), marker);
-  });
-  marker.addListener("click", () => {
-    infoWindow.open(map, marker);
-  });
-  savePinToDatabase(location.lat(), location.lng(), length, weight);
+  const modalElement = document.querySelector(".modal");
+  modalElement.style.display = "block";
 }
-//
-async function savePinToDatabase(lat, lng, length, weight) {
+document.getElementById("saveBtn").addEventListener("click", () => {
+  if (!tempLocation) return;
+
+  const image = document.getElementById("image").files[0];
+
+  const createdMarker = {
+    latitude: tempLocation.lat,
+    longitude: tempLocation.lng,
+    name: document.getElementById("name").value,
+    weight: document.getElementById("weight").value,
+    length: document.getElementById("length").value,
+    bait: document.getElementById("bait").value,
+    date: document.getElementById("date").value,
+    image: image,
+    baitInfo: document.getElementById("baitInfo").value,
+  };
+
+  addMarker(createdMarker);
+  savePinToDatabase(createdMarker);
+
+  document.querySelector(".modal").style.display = "none";
+  tempLocation = null;
+});
+
+async function savePinToDatabase({
+  latitude,
+  longitude,
+  length,
+  weight,
+  bait,
+  name,
+  date,
+  image,
+  baitInfo,
+}) {
   try {
-    const response = await fetch("http://localhost:3000/add-pins", {
+    const formData = new FormData();
+    formData.append("lat", latitude);
+    formData.append("lng", longitude);
+    formData.append("length", length);
+    formData.append("weight", weight);
+    formData.append("bait", bait);
+    formData.append("name", name);
+    formData.append("date", date);
+    formData.append("baitInfo", baitInfo);
+    if (image) {
+      formData.append("image", image);
+    }
+    const response = await fetch("http://localhost:3000/pins/add-pins", {
       method: "POST",
       credentials: "same-origin",
       mode: "cors",
       cache: "no-cache",
       headers: {
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({ lat, lng, length, weight }),
+      body: formData,
     });
 
     if (!response.ok) {
@@ -87,10 +184,67 @@ async function savePinToDatabase(lat, lng, length, weight) {
     }
 
     const data = await response.json();
-    console.log("Pin saved successfully:", data);
+    console.log("Pin saved successfully:", formData);
+    return formData;
   } catch (error) {
     console.error("Failed to save pin:", error);
   }
 }
 
-//
+const closeBtn1 = document.querySelector(".close");
+const closeBtn2 = document.querySelector(".closebtn");
+
+function closeBtnClick() {
+  const modalElement = document.querySelector(".modal");
+  modalElement.style.display = "none";
+}
+closeBtn1.addEventListener("click", closeBtnClick);
+closeBtn2.addEventListener("click", closeBtnClick);
+
+async function executeSearch() {
+  const searchInput = document.getElementById("searchInput").value;
+  const token = localStorage.getItem("token");
+  const input2024 = document.querySelector("#input2024");
+  const input2025 = document.querySelector("#input2025");
+  const years = [];
+  if (input2024.checked) {
+    years.push(2024);
+  }
+  if (input2025.checked) {
+    years.push(2025);
+  }
+  console.log(years);
+  const response = await fetch("http://localhost:3000/pins/search", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      // Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ search: searchInput, year: years }),
+  });
+
+  const data = await response.json();
+  const results = data.results;
+
+  const tableBody = document.getElementById("salmon-table-body");
+  tableBody.innerHTML = "";
+  markers.forEach((marker) => {
+    map.removeLayer(marker);
+  });
+  markers = [];
+  if (results.length === 0) {
+    tableBody.innerHTML = `<tr><td>Ingen resultat</td></tr>`;
+  } else {
+    results
+      .sort((a, b) => b.weight - a.weight)
+      .forEach((pin) => {
+        addTableRow(pin);
+        addMarker(pin);
+      });
+    hideLoggedInElements();
+  }
+}
+
+document
+  .getElementById("searchButton")
+  .addEventListener("click", executeSearch);

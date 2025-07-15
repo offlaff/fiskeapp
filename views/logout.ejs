@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Leilighet</title>
-    <%- include('./partials/head.ejs') %>
+    <title>Document</title>
   </head>
   <body>
-    <%- include('./partials/navbar.ejs') %>
-
-    <!-- https://www.airbnb.com.au/help/article/923 -->
+    <script>
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    </script>
   </body>
 </html>

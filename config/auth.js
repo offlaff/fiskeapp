@@ -2,10 +2,13 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const db = require("../db");
 const { QueryTypes } = require("sequelize");
+const bcrypt = require("bcrypt");
 
 module.exports = function (passport) {
   passport.use(
     new LocalStrategy(async function (username, password, done) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       try {
         console.log(db);
         const user = (
@@ -21,7 +24,7 @@ module.exports = function (passport) {
             message: "Incorrect username or password.",
           });
         }
-        if (user.password !== password) {
+        if (user.password !== hashedPassword) {
           return done(null, false, {
             message: "Incorrect username or password.",
           });

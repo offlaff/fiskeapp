@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Registrer bruker</title>
+    <%- include("./partials/head.ejs") %>
+  </head>
+
+  <body>
+    <section class="prompt">
+      <h1>Registrer bruker</h1>
+
+      <section>
+        <label for="username">Brukernavn</label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          autocomplete="username"
+          required
+        />
+      </section>
+      <section>
+        <label for="fullName">Navn:</label>
+        <input
+          id="fullName"
+          name="fullName"
+          type="text"
+          autocomplete="fullName"
+          required
+        />
+      </section>
+      <section>
+        <label for="email">E-post:</label>
+        <input
+          id="email"
+          name="email"
+          type="text"
+          autocomplete="email"
+          required
+        />
+      </section>
+      <section>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required />
+      </section>
+      <button class="btn btn-primary" type="submit">Registrer</button>
+
+      <hr />
+      <p class="help">Har du allerede bruker? <a href="/login">Logg inn</a></p>
+    </section>
+    <script>
+      const submitBtn = document.querySelector("button");
+      submitBtn.addEventListener("click", () => {
+        const body = {
+          username: document.querySelector("#username").value,
+          fullName: document.querySelector("#fullName").value,
+          email: document.querySelector("#email").value,
+          password: document.querySelector("#password").value,
+        };
+        let jsonBody = JSON.stringify(body);
+        console.log(jsonBody, body);
+        fetch("/users/register", {
+          method: "POST",
+          body: jsonBody,
+          headers: {
+            "content-type": "application/json",
+          },
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            if (data.error) {
+              alert(data.error);
+            } else {
+              window.location.href = "/";
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

@@ -1,14 +1,61 @@
 <ul class="nav">
   <li class="nav-item">
-    <a class="nav-link active" href="/">Salmon Map</a>
+    <a class="nav-link active" href="/">Fangst Kart</a>
+  </li>
+  <!-- <li class="nav-item">
+    <a class="nav-link" href="/leilighet">Leig leilighet</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="/views/leilighet.ejs">Rent Apartment</a>
+    <a class="nav-link" href="/stolen">Leig Hytte</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="/views/stolen.ejs">Rent Cottage</a>
+    <a class="nav-link" href="/fishLicense">Fiskekort</a>
+  </li> -->
+  <li class="nav-item loggedOut" style="margin-left: auto">
+    <a class="nav-link" href="/register">Registrer</a>
   </li>
-  <li class="nav-item">
-    <a class="nav-link" href="/views/login.ejs">Login</a>
+  <li class="nav-item loggedIn">
+    <a class="nav-link" href="/addFish">Godkjenn fangst</a>
+  </li>
+  <li class="nav-item loggedIn">
+    <a class="nav-link" href="/addFish">Godkjenn fangst</a>
+  </li>
+  <li class="nav-item loggedOut">
+    <a class="nav-link" href="/login">Logg inn</a>
+  </li>
+
+  <!-- <li class="nav-item loggedIn">
+    <p class="nav-link">Hello <span class="data-username"> </span></p>
+  </li> -->
+  <li class="nav-item loggedIn" style="margin-left: auto">
+    <a class="nav-link" href="/logout">Logg ut</a>
   </li>
 </ul>
+
+<script>
+  async function hideLoggedInElements() {
+    const response = await fetch("/users/me", {
+      headers: { authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    console.log(response);
+    if (response.status !== 200) {
+      document.querySelectorAll(".loggedIn").forEach((ele) => {
+        ele.remove();
+      });
+    }
+    const data = await response.json();
+    if (data.username) {
+      document.querySelectorAll(".loggedIn").forEach((ele) => {
+        ele.style.display = "block";
+      });
+      document.querySelectorAll(".loggedOut").forEach((ele) => {
+        ele.style.display = "none";
+        ele.remove();
+      });
+      document.querySelectorAll(".data-username").forEach((ele) => {
+        ele.innerHTML = data.username;
+      });
+    }
+  }
+  hideLoggedInElements();
+</script>
