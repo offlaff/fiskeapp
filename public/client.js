@@ -168,7 +168,7 @@ async function savePinToDatabase({
     if (image) {
       formData.append("image", image);
     }
-    const response = await fetch("http://localhost:3000/pins/add-pins", {
+    const response = await fetch("/pins/add-pins", {
       method: "POST",
       credentials: "same-origin",
       mode: "cors",
@@ -214,7 +214,7 @@ async function executeSearch() {
     years.push(2025);
   }
   console.log(years);
-  const response = await fetch("http://localhost:3000/pins/search", {
+  const response = await fetch("/pins/search", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
