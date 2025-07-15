@@ -4,42 +4,64 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DAB - Adoption Login</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <%- include("./partials/head.ejs") %>
   </head>
 
   <body>
-    <form action="/logout" method="post">
-      <button class="logout" type="submit">Sign out</button>
-    </form>
     <div id="login-form">
-      <form action="/login" method="post">
-        <section>
-          <label for="username">Username</label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            autocomplete="username"
-            required
-            autofocus
-          />
-        </section>
-        <section>
-          <label for="current-password">Password</label>
-          <input
-            id="current-password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            required
-          />
-        </section>
-        <button type="submit">Sign in</button>
-      </form>
+      <section>
+        <label for="username">Brukernavn</label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          autocomplete="username"
+          required
+          autofocus
+        />
+      </section>
+      <section>
+        <label for="password">Passord</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        />
+      </section>
+      <button class="btn btn-primary" type="submit" id="signIn">
+        Logg inn
+      </button>
       <hr />
     </div>
+    <script>
+      const submitBtn = document.querySelector("#signIn");
+      submitBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        const body = {
+          username: document.querySelector("#username").value,
+          password: document.querySelector("#password").value,
+        };
+        console.log(body);
+        fetch("/users/login", {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+              return;
+            }
+            localStorage.setItem("token", data.token);
+            window.location.href = "/";
+          });
+        return false;
+      });
+    </script>
   </body>
 </html>

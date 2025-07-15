@@ -12,7 +12,11 @@ const session = require("express-session");
 const flash = require("express-flash");
 const SQLiteStore = require("connect-sqlite3")(session);
 const pinRoutes = require("./routes/pins");
+const authRoutes = require("./routes/users");
 var cookieParser = require("cookie-parser");
+const bcrypt = require("bcrypt");
+const { isAdmin, getAuth } = require("./middleware/auth");
+const fileUpload = require("express-fileupload");
 
 app.use(
   session({
@@ -30,67 +34,60 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, "public")));
-
-app.use(pinRoutes);
+app.use("/users", authRoutes);
+app.use("/pins", pinRoutes);
 
 app.use(cookieParser());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.get("/", function (req, res, next) {
-  res.render("index", { title: "Express", user: req.user });
-});
-
-// må være logget inn
-app.get("/add-pins", isLoggedIn, function (req, res, next) {
-  res.render("index", { title: "Express", user: req.user });
-});
-app.post(
-  "/login",
-  passport.authenticate("local", {
-    successRedirect: "/add-pins",
-    failureRedirect: "/login?error",
-    failureFlash: true,
+app.use(
+  fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
   })
 );
 
-// app.post("/add-pins", isLoggedIn, (req, res) => {
-//   const { lat, lng, length, weight } = req.body;
-//   console.log(lat, lng, length, weight);
-//   const query =
-//     "INSERT INTO pins (latitude, longitude, length, weight) VALUES (?, ?, ?, ?)";
-//   db.query(query, [lat, lng, length, weight], (err, result) => {
-//     if (err) {
-//       console.error("Error inserting pin:", err);
-//       return res.status(500).send("Error saving pin");
-//     }
-//     res.send({ success: true, id: result.insertId });
-//   });
-// });
-// gjer om te sequelize og fiks bug
-app.get("/api/pins", (req, res) => {
-  db.query("SELECT * FROM pins", (err, results) => {
-    if (err) {
-      console.error("Error fetching pins:", err);
-      return res.status(500).send("Error loading pins");
-    }
-    res.json(results);
+app.get("/", getAuth, function (req, res, next) {
+  console.log(req.user);
+  res.render("index", { title: "Express", user: req.user });
+});
+
+app.get("/logout", getAuth, function (req, res, next) {
+  res.render("logout", { title: "Express", user: req.user });
+});
+db.sequelize
+  .sync({ force: true })
+  .then(() => {})
+  .catch((err) => {
+    console.error("Sync error:", err);
   });
+
+app.post("/init", async function (req, res) {
+  const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+  const adminUser = {
+    username: "admin",
+    fullName: process.env.ADMIN_NAME,
+    email: process.env.ADMIN_EMAIL,
+    password: hashedPassword,
+    role: "admin",
+  };
+  await db.users.create(adminUser, { ignoreDuplicates: true });
+  res.status(200).json({ success: true });
+});
+
+app.get("/edit/:id", async function (req, res) {
+  const pin = await db.pins.findByPk(parseInt(req.params.id));
+  res.render("editFish", { pin });
 });
 
 app.get("/login", function (req, res, next) {
   res.render("login", { title: "Express", user: req.user });
 });
-//1. request for å adde pin i databasen
-// login endepunkt
-//
+app.get("/register", function (req, res, next) {
+  res.render("register", { title: "Express", user: req.user });
+});
 
-function isLoggedIn(req, res, next) {
-  if (req.user) {
-    return next();
-  }
-  console.log(req.user);
-  res.redirect("/login");
-}
-
+app.get("/addFish", function (req, res, next) {
+  res.render("addFish", { title: "Express", user: req.user });
+});
 module.exports = app;
