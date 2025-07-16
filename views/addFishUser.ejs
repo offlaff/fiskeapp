@@ -3,7 +3,68 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Din oversikt</title>
+    <%- include('./partials/head.ejs') %>
   </head>
-  <body></body>
+  <body>
+    <div class="container mt-5">
+      <h2 class="text-center mb-4">Godkjenn Fangst</h2>
+
+      <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+          <tr>
+            <th>Navn</th>
+            <th>Vekt</th>
+            <th>Lengde</th>
+            <th>Agn</th>
+            <th>Dato</th>
+            <th>Rediger</th>
+          </tr>
+        </thead>
+        <tbody id="publish-table-body"></tbody>
+      </table>
+    </div>
+
+    <script>
+      let pins = [];
+      let token = localStorage.getItem("token");
+      if (!token) {
+        console.log("tokenproblem");
+      }
+      function getMyFish() {
+        fetch("/pins/myPins", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            pins = result;
+            onGotMyFish();
+          });
+      }
+
+      function onGotMyFish() {
+        const tableBody = document.getElementById("publish-table-body");
+        tableBody.innerHTML = "";
+
+        pins.forEach((pin) => {
+          const editButton = `<a href="/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn" data-id="${pin.id}">Rediger</a>`;
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${pin.name}</td>
+            <td>${pin.weight}</td>
+            <td>${pin.length}</td>
+            <td>${pin.bait}</td>
+            <td>${pin.date}</td>
+            <td >${editButton}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        getMyFish();
+      });
+    </script>
+  </body>
 </html>

@@ -56,7 +56,7 @@ app.get("/logout", getAuth, function (req, res, next) {
   res.render("logout", { title: "Express", user: req.user });
 });
 db.sequelize
-  .sync({ force: true })
+  .sync({ alter: true })
   .then(() => {})
   .catch((err) => {
     console.error("Sync error:", err);
@@ -89,5 +89,13 @@ app.get("/register", function (req, res, next) {
 
 app.get("/addFish", function (req, res, next) {
   res.render("addFish", { title: "Express", user: req.user });
+});
+
+app.get("/addFishUser", function (req, res, next) {
+  res.render("addFishUser", { title: "Express", user: req.user });
+});
+
+app.get("/editFishUser", function (req, res, next) {
+  res.render("editFishUser", { title: "Express", user: req.user });
 });
 module.exports = app;

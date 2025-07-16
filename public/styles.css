@@ -96,6 +96,10 @@ padding: 0;
     margin-top: 20px;
 }
 
+.isAdmin {
+    display: block;
+}
+
 .callOut {
     text-align: center;
     padding-left: 20px;

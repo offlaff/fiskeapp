@@ -14,11 +14,11 @@
   <li class="nav-item loggedOut" style="margin-left: auto">
     <a class="nav-link" href="/register">Registrer</a>
   </li>
-  <li class="nav-item loggedIn">
+  <li class="nav-item loggedInAdmin">
     <a class="nav-link" href="/addFish">Godkjenn fangst</a>
   </li>
-  <li class="nav-item loggedIn">
-    <a class="nav-link" href="/addFish">Godkjenn fangst</a>
+  <li class="nav-item loggedInUser">
+    <a class="nav-link" href="/addFishUser">Din oversikt</a>
   </li>
   <li class="nav-item loggedOut">
     <a class="nav-link" href="/login">Logg inn</a>
@@ -54,6 +54,12 @@
       });
       document.querySelectorAll(".data-username").forEach((ele) => {
         ele.innerHTML = data.username;
+      });
+    }
+    if (data.role === "user") {
+      document.querySelectorAll(".isAdmin").forEach((ele) => {
+        ele.style.display = "none";
+        ele.remove();
       });
     }
   }

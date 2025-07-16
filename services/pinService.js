@@ -54,6 +54,19 @@ class PinService {
     await pinFromDb.save();
     return pinFromDb;
   }
+
+  async getUserFish(userId) {
+    return await db.pins.findAll({
+      where: { userId: userId, published: 0 },
+      include: [
+        {
+          model: db.users,
+          as: "user",
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+  }
 }
 
 module.exports = PinService;

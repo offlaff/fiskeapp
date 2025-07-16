@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("../db");
+
 const passport = require("passport");
 const router = express.Router();
 const PinService = require("../services/pinService");
@@ -50,12 +51,16 @@ router.get("/", async (req, res) => {
   console.log(result);
   res.json(result[0]);
 });
-router.get("/myPins", async (req, res) => {
-  const result = await db.sequelize.query(
-    "select * from pins WHERE userId = ?;"
-  );
-  console.log(result);
-  res.json(result[0]);
+
+router.get("/myPins", isAuth, async (req, res) => {
+  try {
+    const myPins = await pinService.getUserFish(req.user.id);
+
+    console.log(myPins);
+    res.json(myPins);
+  } catch (error) {
+    res.status(500).json({ message: "server error" });
+  }
 });
 
 router.get("/unpublished", async (req, res) => {
@@ -80,21 +85,31 @@ router.post("/search", async function (req, res) {
 
 router.patch(
   "/edit/:id",
-  isAdmin,
+  isAuth,
   upload.single("image"),
   async function (req, res) {
+    const user = await db.users.findByPk(req.user.id);
+    const isAdmin = user.role === "admin";
+    const pin = await db.pins.findByPk(req.params.id);
+
+    const isOwner = pin.userId === req.user.id;
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
     const image = req.file?.filename;
 
-    const pin = req.body;
-    const response = pinService.validatePin(pin);
+    const newPin = req.body;
+    const response = pinService.validatePin(newPin);
     if (!response.success) {
       return res.status(400).json(response.errors);
     }
     try {
       await pinService.updatePin({
-        ...pin,
+        ...newPin,
         id: parseInt(req.params.id),
         image: image,
+        published: isAdmin ? newPin.published : undefined,
       });
       res.status(200).json({ success: true });
     } catch {

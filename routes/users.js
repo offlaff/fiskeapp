@@ -57,6 +57,7 @@ router.get("/me", isAuth, async (req, res) => {
     username: user.username,
     email: user.email,
     phone: user.phone,
+    role: user.role,
   });
 });
 
