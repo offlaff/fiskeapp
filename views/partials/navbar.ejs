@@ -14,10 +14,10 @@
   <li class="nav-item loggedOut" style="margin-left: auto">
     <a class="nav-link" href="/register">Registrer</a>
   </li>
-  <li class="nav-item loggedInAdmin">
+  <li class="nav-item loggedInAdmin" style="display: none">
     <a class="nav-link" href="/addFish">Godkjenn fangst</a>
   </li>
-  <li class="nav-item loggedInUser">
+  <li class="nav-item loggedInUser" style="display: none">
     <a class="nav-link" href="/addFishUser">Din oversikt</a>
   </li>
   <li class="nav-item loggedOut">
@@ -37,13 +37,14 @@
     const response = await fetch("/users/me", {
       headers: { authorization: `Bearer ${localStorage.getItem("token")}` },
     });
-    console.log(response);
     if (response.status !== 200) {
       document.querySelectorAll(".loggedIn").forEach((ele) => {
-        ele.remove();
+        return;
       });
     }
     const data = await response.json();
+    console.log(data);
+
     if (data.username) {
       document.querySelectorAll(".loggedIn").forEach((ele) => {
         ele.style.display = "block";
@@ -52,15 +53,22 @@
         ele.style.display = "none";
         ele.remove();
       });
-      document.querySelectorAll(".data-username").forEach((ele) => {
-        ele.innerHTML = data.username;
-      });
+      if (data.role === "admin") {
+        document.querySelectorAll(".loggedInAdmin").forEach((ele) => {
+          ele.style.display = "block";
+        });
+      } else {
+        document
+          .querySelectorAll(".loggedInAdmin")
+          .forEach((ele) => ele.remove());
+      }
     }
     if (data.role === "user") {
-      document.querySelectorAll(".isAdmin").forEach((ele) => {
-        ele.style.display = "none";
-        ele.remove();
+      document.querySelectorAll(".loggedInUser").forEach((ele) => {
+        ele.style.display = "block";
       });
+    } else {
+      document.querySelectorAll(".loggedInUser").forEach((ele) => ele.remove());
     }
   }
   hideLoggedInElements();
