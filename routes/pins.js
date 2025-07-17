@@ -39,12 +39,15 @@ router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
   if (!success) {
     return res.status(400).json({ success: false, errors });
   }
+  const parsedWeight = parseFloat(weight?.replace(",", "."));
+  const parsedLength = parseFloat(length?.replace(",", "."));
+
   try {
     const result = await db.pins.create({
       latitude: lat,
       longitude: lng,
-      length: length,
-      weight: weight,
+      length: parsedLength,
+      weight: parsedWeight,
       bait: bait,
       name: name,
       date: date,
