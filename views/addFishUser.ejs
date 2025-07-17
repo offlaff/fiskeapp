@@ -8,7 +8,7 @@
   </head>
   <body>
     <div class="container mt-5">
-      <h2 class="text-center mb-4">Godkjenn Fangst</h2>
+      <h2 class="text-center mb-4">Fisk som ligger til godkjenning</h2>
 
       <table class="table table-striped table-bordered">
         <thead class="thead-dark">
@@ -17,7 +17,9 @@
             <th>Vekt</th>
             <th>Lengde</th>
             <th>Agn</th>
+            <th>Informasjonon om agn</th>
             <th>Dato</th>
+            <th>Bilde</th>
             <th>Rediger</th>
           </tr>
         </thead>
@@ -56,7 +58,10 @@
             <td>${pin.weight}</td>
             <td>${pin.length}</td>
             <td>${pin.bait}</td>
+            <td>${pin.baitInfo}
             <td>${pin.date}</td>
+            <td> <img style="width: 100px; height: 100px; object-fit: contain;"
+             src="/images/${pin.image}"></td>
             <td >${editButton}</td>
           `;
           tableBody.appendChild(row);

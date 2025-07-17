@@ -27,21 +27,36 @@ const upload = multer({
 router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
   const image = req.file?.filename;
   const { lat, lng, length, weight, bait, name, date, baitInfo } = req.body;
-  console.log({ lat, lng, length, weight });
-  const result = await db.pins.create({
-    latitude: lat,
-    longitude: lng,
-    length: length,
-    weight: weight,
-    bait: bait,
-    name: name,
-    date: date,
-    published: false,
-    image: image,
-    baitInfo: baitInfo,
-    userId: req.user.id,
+
+  const { success, errors } = pinService.validatePin({
+    name,
+    weight,
+    length,
+    bait,
+    date,
   });
-  res.json({ success: true });
+
+  if (!success) {
+    return res.status(400).json({ success: false, errors });
+  }
+  try {
+    const result = await db.pins.create({
+      latitude: lat,
+      longitude: lng,
+      length: length,
+      weight: weight,
+      bait: bait,
+      name: name,
+      date: date,
+      published: false,
+      image: image,
+      baitInfo: baitInfo,
+      userId: req.user.id,
+    });
+    res.json({ success: true, pin: result });
+  } catch (error) {
+    res.status(500).json({ success: false });
+  }
 });
 
 router.get("/", async (req, res) => {

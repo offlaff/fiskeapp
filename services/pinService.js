@@ -34,9 +34,36 @@ class PinService {
       );
     }
   }
-  validatePin(pin) {
-    return { success: true, errors: [] };
-    //implement
+  validatePin(options) {
+    const { name, weight, length, bait, date } = options;
+    const errorArray = [];
+    if (!name || typeof name !== "string") {
+      errorArray.push({
+        msg: "Må inkludere navn",
+      });
+    }
+    const parsedWeight = parseFloat(weight?.replace(",", "."));
+    if (!weight || isNaN(parsedWeight)) {
+      errorArray.push({ msg: "Vekt på fisk må være et gyldig tall" });
+    }
+    const parsedLength = parseFloat(length?.replace(",", "."));
+    if (!length || isNaN(parsedLength)) {
+      errorArray.push({ msg: "Lengde på fisk må være et gyldig tall" });
+    }
+    if (!bait) {
+      errorArray.push({
+        msg: "Agn må inkluderes",
+      });
+    }
+    if (!date || isNaN(Date.parse(date))) {
+      errorArray.push({
+        msg: "Gyldig dato må inkluderes, format: YYYY-MM-DD",
+      });
+    }
+    return {
+      success: errorArray.length === 0,
+      errors: errorArray,
+    };
   }
   async updatePin(pin) {
     const pinFromDb = await db.pins.findByPk(pin.id);

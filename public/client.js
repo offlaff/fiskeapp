@@ -69,6 +69,9 @@ function addTableRow(pin) {
     <td>${pin.length}</td>
     <td>${pin.bait}</td>
     <td>${pin.date}</td>
+    <td> <a href ="/images/${pin.image}" target="_blank">
+     <img style="width: 75px; height: 75px; object-fit: contain;" src="/images/${pin.image}">
+     </a></td>
     <td class="loggedIn">${editButton}</td>
   `;
   table.appendChild(row);
