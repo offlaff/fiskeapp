@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>dertokant</title>
     <%- include('./partials/head.ejs') %>
   </head>
   <body>
@@ -64,7 +64,7 @@
         <input
           value="<%= pin.date %>"
           id="date"
-          type="text"
+          type="date"
           class="form-control"
           placeholder="2025-05-28"
         />
@@ -160,7 +160,8 @@
         const formdata = new FormData();
         formdata.append("name", name);
         formdata.append("weight", weight);
-
+        formdata.append("date", date);
+        
         formdata.append("length", length);
         formdata.append("bait", bait);
         formdata.append("published", published);

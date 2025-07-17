@@ -57,7 +57,7 @@ class PinService {
     }
     if (!date || isNaN(Date.parse(date))) {
       errorArray.push({
-        msg: "Gyldig dato må inkluderes, format: YYYY-MM-DD",
+        msg: `Gyldig dato må inkluderes, format: YYYY-MM-DD. Mottatt: ${date}`,
       });
     }
     return {
