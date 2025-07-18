@@ -94,6 +94,15 @@ class PinService {
       order: [["createdAt", "DESC"]],
     });
   }
+  async deletePin(id) {
+    if (!id) {
+      return { error: "id is required" };
+    }
+    const pin = await db.pins.findByPk(id);
+    if (!pin) return { error: "Not found" };
+    await pin.destroy();
+    return { message: "Destroyed" };
+  }
 }
 
 module.exports = PinService;

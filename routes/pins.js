@@ -70,6 +70,13 @@ router.get("/", async (req, res) => {
   res.json(result[0]);
 });
 
+router.delete("/:id", async function (req, res, next) {
+  const result = await pinService.deletePin(req.params.id);
+  if (result.error) return res.status(404).json(result);
+
+  res.json({ message: "pin deleted" });
+});
+
 router.get("/myPins", isAuth, async (req, res) => {
   try {
     const myPins = await pinService.getUserFish(req.user.id);
