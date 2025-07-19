@@ -9,7 +9,7 @@ function initMap() {
   map = L.map("map", {
     zoomControl: false,
   }).setView([59.456599116158394, 6.3862352690536195], zoomLevel);
-  map.touchZoom.disable();
+  // map.touchZoom.disable(); disable for telefonbrukerar?
   map.doubleClickZoom.disable();
   map.scrollWheelZoom.disable();
   map.boxZoom.disable();
