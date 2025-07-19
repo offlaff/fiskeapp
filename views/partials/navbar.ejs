@@ -55,7 +55,7 @@
       });
       if (data.role === "admin") {
         document.querySelectorAll(".loggedInAdmin").forEach((ele) => {
-          ele.style.display = "block";
+          ele.style.display = "revert";
         });
       } else {
         document
@@ -65,7 +65,7 @@
     }
     if (data.role === "user") {
       document.querySelectorAll(".loggedInUser").forEach((ele) => {
-        ele.style.display = "block";
+        ele.style.display = "revert";
       });
     } else {
       document.querySelectorAll(".loggedInUser").forEach((ele) => ele.remove());
