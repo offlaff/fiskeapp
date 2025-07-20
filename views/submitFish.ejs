@@ -10,7 +10,7 @@
     <%- include('./partials/navbar.ejs') %>
     <h4 style="padding: 20px; text-align: center;"> Flytt på markeringen til der laksen tok 🐟 </h4>
     <div id="map"></div>
-    <div class="modal-body">
+    <div class="modal-body center-container">
       <div class="form-group mb-3">
         <label>Navn på fisker</label>
         <input
@@ -74,7 +74,7 @@
       let map = null;
       let templocation = 0;
       const zoomLevel = 15.5;
-      let markers = [];
+      let marker = null;
       window.onload = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -163,11 +163,21 @@
             '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }).addTo(map);
         addMarker(pin);
+        map.on("click", (event) => {
+            pin.latitude = event.latlng.lat
+            pin.longitude = event.latlng.lng
+            addMarker(pin)
+
+            
+        })
       }
       initMap();
 
       function addMarker(pin) {
-        const marker = L.marker([pin.latitude, pin.longitude], {
+        if(marker){
+            map.removeLayer(marker)
+        }
+        marker = L.marker([pin.latitude, pin.longitude], {
           draggable: true,
         }).addTo(map);
 
@@ -177,8 +187,6 @@
         markerIcon.options.iconAnchor = [9, 20];
         markerIcon.options.iconSize = [iconSize * 0.7, iconSize];
         marker.setIcon(markerIcon);
-        console.log(marker);
-        markers.push(marker);
         marker.on("dragend", function (e) {
           const newLatLng = e.target.getLatLng();
           pin.latitude = newLatLng.lat;
@@ -186,7 +194,6 @@
           console.log(pin.latitude, pin.longitude);
         });
 
-        markers.push(marker);
       }
       hideLoggedInElements();
     </script>
