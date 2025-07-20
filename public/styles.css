@@ -130,3 +130,14 @@ padding: 0;
 .primary-nav-link {
     background: var(--primary-5)
 }
+
+.light-text {
+    color: #666;
+}
+
+.popupTable td {
+    padding: 1px 0px;
+}
+.popupTable td:first-child {
+    padding-right: 8px;
+}

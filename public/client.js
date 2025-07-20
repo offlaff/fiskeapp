@@ -118,12 +118,29 @@ function addMarker(pin) {
   console.log(marker);
   markers.push(marker);
   marker.bindPopup(
-    `🐟 <br>Lengde: ${pin.length} <br> Vekt: ${pin.weight}
-     <br> Agn: ${pin.bait} 
-     <br> Fisker: ${pin.name} 
-     <br> Dato: ${pin.date}
-     <br> <a href ="/images/${pin.image}" target="_blank">
-     <td>
+    `<table class="popupTable"> 
+     <tr>
+        <td class="light-text">Vekt:</td>
+        <td><strong>${pin.weight}kg</strong></td>
+        </tr>
+        <tr>
+        <td class="light-text">Lengde:</td>
+        <td>${pin.length}cm</td>
+        </tr>
+       
+        <tr>
+        <td class="light-text">Agn:</td>
+        <td>${pin.bait}</td>
+        </tr>
+        <tr>
+        <td class="light-text">Fisker:</td>
+        <td>${pin.name}</td>
+        </tr>
+        <tr>
+        <td class="light-text">Dato:</td>
+        <td>${pin.date}</td>
+        </tr>
+    </table>
   ${
     pin.image
       ? `<a href="/images/${pin.image}" target="_blank">
@@ -131,8 +148,7 @@ function addMarker(pin) {
          </a>`
       : ""
   }
-</td>
-     </a>`
+    `
   );
 }
 
