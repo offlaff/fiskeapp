@@ -51,11 +51,19 @@
               <td>${pin.length}</td>
               <td>${pin.bait}</td>
               <td>${pin.date}</td>
-              <td><a href ="/images/${pin.image}" target="_blank">
-     <img style="width: 100px; height: 100px; object-fit: contain;" src="/images/${pin.image}">
-     </a></td
+              <td>
+  ${
+    pin.image
+      ? `<a href="/images/${pin.image}" target="_blank">
+           <img style="width: 75px; height: 75px; object-fit: contain;" src="/images/${pin.image}">
+         </a>`
+      : "-"
+  }
+</td>
               <td >${editButton}</td>
-          <td> <button id="deletebtn${pin.id}" class="btn btn-danger btn-sm">Slett</button></td>
+          <td> <button id="deletebtn${
+            pin.id
+          }" class="btn btn-danger btn-sm">Slett</button></td>
 
             `;
           tableBody.appendChild(row);

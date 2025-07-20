@@ -79,9 +79,15 @@ function addTableRow(pin) {
     <td>${pin.length}</td>
     <td>${pin.bait}</td>
     <td>${pin.date}</td>
-    <td> <a href ="/images/${pin.image}" target="_blank">
-     <img style="width: 75px; height: 75px; object-fit: contain;" src="/images/${pin.image}">
-     </a></td>
+    <td>
+  ${
+    pin.image
+      ? `<a href="/images/${pin.image}" target="_blank">
+           <img style="width: 75px; height: 75px; object-fit: contain;" src="/images/${pin.image}">
+         </a>`
+      : "Ingen bilde"
+  }
+</td>
     <td class="loggedIn">${editButton}</td>
   `;
   table.appendChild(row);
@@ -112,12 +118,20 @@ function addMarker(pin) {
   console.log(marker);
   markers.push(marker);
   marker.bindPopup(
-    `🐟 Lengde: ${pin.length} <br> Vekt: ${pin.weight}
+    `🐟 <br>Lengde: ${pin.length} <br> Vekt: ${pin.weight}
      <br> Agn: ${pin.bait} 
      <br> Fisker: ${pin.name} 
      <br> Dato: ${pin.date}
      <br> <a href ="/images/${pin.image}" target="_blank">
-     <img style="width: 100px; height: 100px; object-fit: contain;" src="/images/${pin.image}">
+     <td>
+  ${
+    pin.image
+      ? `<a href="/images/${pin.image}" target="_blank">
+           <img style="width: 75px; height: 75px; object-fit: contain;" src="/images/${pin.image}">
+         </a>`
+      : ""
+  }
+</td>
      </a>`
   );
 }
