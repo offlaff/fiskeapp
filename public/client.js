@@ -4,14 +4,24 @@ let templocation = 0;
 const zoomLevel = 15.5;
 let markers = [];
 let user = null;
+const clusterGroup = new L.MarkerClusterGroup({
+  zoomToBoundsOnClick: true,
+  showCoverageOnHover: false,
+  maxClusterRadius: 80,
+});
 
 function initMap() {
+  const northEast = L.latLng(59.462346, 6.40663);
+  const southWest = L.latLng(59.451664, 6.360802);
   map = L.map("map", {
     zoomControl: false,
+    maxBounds: L.latLngBounds(southWest, northEast),
+    minZoom: 14,
   }).setView([59.456599116158394, 6.3862352690536195], zoomLevel);
+
   // map.touchZoom.disable(); disable for telefonbrukerar?
   map.doubleClickZoom.disable();
-  map.scrollWheelZoom.disable();
+  // map.scrollWheelZoom.disable();
   map.boxZoom.disable();
   map.keyboard.disable();
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -52,7 +62,7 @@ function getPins() {
 
 function onGotPins() {
   pins.forEach((pin) => {
-    addMarker(pin);
+    // addMarker(pin);
     addTableRow(pin);
   });
 }
@@ -92,7 +102,7 @@ document.getElementById("salmon-table-body").addEventListener("click", (e) => {
 });
 
 function addMarker(pin) {
-  const marker = L.marker([pin.latitude, pin.longitude]).addTo(map);
+  const marker = L.marker([pin.latitude, pin.longitude]);
   const markerIcon = marker.options.icon;
   const iconSize = 20;
   markerIcon.options.shadowSize = [0, 0];
@@ -121,7 +131,7 @@ function onMapClick(location) {
   tempLocation = location.latlng;
 
   const modalElement = document.querySelector(".modal");
-  modalElement.style.display = "block";
+  // modalElement.style.display = "block";
 }
 document.getElementById("saveBtn").addEventListener("click", () => {
   if (!tempLocation) return;
@@ -140,7 +150,6 @@ document.getElementById("saveBtn").addEventListener("click", () => {
     baitInfo: document.getElementById("baitInfo").value,
   };
 
-  addMarker(createdMarker);
   savePinToDatabase(createdMarker);
 
   document.querySelector(".modal").style.display = "none";
@@ -232,8 +241,9 @@ async function executeSearch() {
   const tableBody = document.getElementById("salmon-table-body");
   tableBody.innerHTML = "";
   markers.forEach((marker) => {
-    map.removeLayer(marker);
+    clusterGroup.removeLayer(marker);
   });
+  map.removeLayer(clusterGroup);
   markers = [];
   if (results.length === 0) {
     tableBody.innerHTML = `<tr><td>Ingen resultat</td></tr>`;
@@ -244,6 +254,10 @@ async function executeSearch() {
         addTableRow(pin);
         addMarker(pin);
       });
+    markers.forEach((clusterItem) => {
+      clusterGroup.addLayer(clusterItem);
+    });
+    map.addLayer(clusterGroup);
     hideLoggedInElements();
   }
 }

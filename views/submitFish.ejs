@@ -8,13 +8,12 @@
   </head>
   <body>
     <%- include('./partials/navbar.ejs') %>
+    <h4 style="padding: 20px; text-align: center;"> Flytt på markeringen til der laksen tok 🐟 </h4>
     <div id="map"></div>
     <div class="modal-body">
-      <input id="pinId" value="<%= pin.id %>" type="hidden" />
       <div class="form-group mb-3">
         <label>Navn på fisker</label>
         <input
-          value="<%= pin.name %>"
           id="name"
           type="text"
           class="form-control"
@@ -23,36 +22,23 @@
       </div>
       <div class="form-group mb-3">
         <label>Vekt (kg)</label>
-        <input
-          value="<%= pin.weight %>"
-          id="weight"
-          type="text"
-          class="form-control"
-          placeholder="4,4"
-        />
+        <input id="weight" type="text" class="form-control" placeholder="4,4" />
       </div>
       <div class="form-group mb-3">
         <label>Lengde (cm)</label>
-        <input
-          value="<%= pin.length %>"
-          id="length"
-          type="text"
-          class="form-control"
-          placeholder="75"
-        />
+        <input id="length" type="text" class="form-control" placeholder="75" />
       </div>
       <div class="form-group mb-3">
         <label>Agn</label>
         <select class="form-select" id="bait">
-          <option <%= pin.bait === "flue"? "selected": ""%>  value="flue">Flue</option>
-          <option <%= pin.bait === "sluk"? "selected": ""%> value="sluk">Sluk</option>
-          <option <%= pin.bait === "wobbler"? "selected": ""%> value="wobbler">Wobbler</option>
+          <option value="flue">Flue</option>
+          <option value="sluk">Sluk</option>
+          <option value="wobbler">Wobbler</option>
         </select>
       </div>
       <div class="form-group mb-3">
         <label>Informasjon om agn:</label>
         <input
-        value="<%= pin.baitInfo %>"
           id="length"
           type="text"
           class="form-control"
@@ -62,7 +48,6 @@
       <div class="form-group mb-3">
         <label>Dato (YYYY-MM-DD)</label>
         <input
-          value="<%= pin.date %>"
           id="date"
           type="date"
           class="form-control"
@@ -77,58 +62,38 @@
           class="form-control"
           accept="image/png, image/jpeg, image/jpg"
         />
-      </div>
-      <div class="form-group mb-3" id="adminCheck">
-        <label>Publisert</label>
-        <div>
-          <% if(pin.published) { %>
-
-          <input
-            id="published"
-            value="<%= pin.date %>"
-            type="checkbox"
-            checked
-          />
-          <% }else { %>
-          <input id="published" value="<%= pin.date %>" type="checkbox" />
-          <% } %>
         </div>
       </div>
-      <div>
-        <button class=" btn btn-success" id="save">Lagre endringer</button>
+      <div style ="padding: 20px; padding-top: 0px;">
+        <button class="btn btn-success" id="save">Send inn til godkjenning</button>
       </div>
     </div>
     <script>
-      const pin = <%- JSON.stringify(pin) %>;
-      console.log(pin);
-    </script>
-
-    <script>
+      let pin = {latitude: 59.456599116158394, longitude: 6.3862352690536195 }
       let user = null;
       let map = null;
       let templocation = 0;
       const zoomLevel = 15.5;
       let markers = [];
       window.onload = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    window.location.replace("/login");
-    return;
-  }
-  await getMe();
-};
+        const token = localStorage.getItem("token");
+        if (!token) {
+          window.location.replace("/login");
+          return;
+        }
+        await getMe();
+      };
 
       async function getCurrentUser() {
-  const response = await fetch("/users/me", {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  const data = await response.json();
-  console.log(data);
-  return data;
-}
-
+        const response = await fetch("/users/me", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const data = await response.json();
+        console.log(data);
+        return data;
+      }
 
       async function getMe() {
         const data = await getCurrentUser();
@@ -136,16 +101,16 @@
         if (data.username) {
           user = data;
           if (user.role !== "admin") {
-            const adminCheck = document.getElementById("adminCheck")
-            if(adminCheck) {
-                adminCheck.style.display = "none"
+            const adminCheck = document.getElementById("adminCheck");
+            if (adminCheck) {
+              adminCheck.style.display = "none";
             }
           }
         } else {
           console.log("is not logged in");
-          window.location.href = "/login"
+          window.location.href = "/login";
         }
-        }
+      }
 
       const savebtn = document.querySelector("#save");
       savebtn.addEventListener("click", async () => {
@@ -154,25 +119,22 @@
         const length = document.getElementById("length").value;
         const bait = document.getElementById("bait").value;
         const date = document.getElementById("date").value;
-        const id = document.getElementById("pinId").value;
-        const published = document.getElementById("published").checked;
         const image = document.getElementById("image").files[0];
         const formdata = new FormData();
         formdata.append("name", name);
         formdata.append("weight", weight);
         formdata.append("date", date);
-        
+
         formdata.append("length", length);
         formdata.append("bait", bait);
-        formdata.append("published", published);
-        formdata.append("latitude", pin.latitude);
-        formdata.append("longitude", pin.longitude);
+        formdata.append("lat", pin.latitude);
+        formdata.append("lng", pin.longitude);
         if (image) {
           formdata.append("image", image);
         }
 
-        const response = await fetch("/pins/edit/" + id, {
-          method: "PATCH",
+        const response = await fetch("/pins/add-pins/", {
+          method: "POST",
           body: formdata,
           headers: {
             authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -180,7 +142,7 @@
         });
         const data = await response.json();
         if (data.success) {
-          alert("Endringer lagret");
+          alert("Fangsten er sendt til godkjenning");
           window.location.href = "/";
         }
       });
@@ -210,7 +172,7 @@
         }).addTo(map);
 
         const markerIcon = marker.options.icon;
-        const iconSize = 20;
+        const iconSize = 30;
         markerIcon.options.shadowSize = [0, 0];
         markerIcon.options.iconAnchor = [9, 20];
         markerIcon.options.iconSize = [iconSize * 0.7, iconSize];

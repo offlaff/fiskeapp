@@ -86,6 +86,9 @@ app.get("/login", function (req, res, next) {
 app.get("/register", function (req, res, next) {
   res.render("register", { title: "Express", user: req.user });
 });
+app.get("/submitFish", function (req, res, next) {
+  res.render("submitFish", { title: "Express", user: req.user });
+});
 
 app.get("/addFish", function (req, res, next) {
   res.render("addFish", { title: "Express", user: req.user });
