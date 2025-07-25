@@ -24,7 +24,7 @@ router.post("/register", async function (req, res) {
   } catch (err) {
     console.log(err);
     if (err.message === "Validation error") {
-      return res.status(400).json({ error: "validation error" });
+      return res.status(400).json({ error: err.message });
     }
     console.log(err);
     return res.status(500).json({ error: "Internal server error" });
