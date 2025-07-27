@@ -9,6 +9,8 @@ const pinService = new PinService();
 const multer = require("multer");
 const path = require("path");
 
+const { uploadImage } = require("../cloudinary");
+
 const imgStorage = multer.diskStorage({
   destination: "./public/images",
   filename: (req, file, cb) => {
@@ -25,7 +27,7 @@ const upload = multer({
 });
 
 router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
-  const image = req.file?.filename;
+  let image;
   const { lat, lng, length, weight, bait, name, date, baitInfo } = req.body;
 
   const { success, errors } = pinService.validatePin({
@@ -38,6 +40,13 @@ router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
 
   if (!success) {
     return res.status(400).json({ success: false, errors });
+  }
+  if (req.file) {
+    const uploadedimage = await uploadImage(req.file.filename);
+    console.log("got image:", uploadedimage);
+    if (uploadedimage.url) {
+      image = uploadedimage.url;
+    }
   }
   const parsedWeight = parseFloat(weight?.replace(",", "."));
   const parsedLength = parseFloat(length?.replace(",", "."));
@@ -113,6 +122,7 @@ router.patch(
   upload.single("image"),
   async function (req, res) {
     try {
+      let image;
       const user = await db.users.findByPk(req.user.id);
       const isAdmin = user.role === "admin";
 
@@ -126,7 +136,13 @@ router.patch(
         return res.status(403).json({ message: "unauthorized" });
       }
 
-      const image = req.file?.filename;
+      if (req.file) {
+        const uploadedimage = await uploadImage(req.file.filename);
+        console.log("got image:", uploadedimage);
+        if (uploadedimage.url) {
+          image = uploadedimage.url;
+        }
+      }
       const rawPin = req.body;
 
       const newPin = {

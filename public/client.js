@@ -67,23 +67,35 @@ function onGotPins() {
   });
 }
 
+function capitalizeFirstLetter(str) {
+  if (str.length === 0) {
+    return ""; // Handle empty strings
+  }
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 function addTableRow(pin) {
   console.log(pin);
 
   const table = document.getElementById("salmon-table-body");
   const editButton = `<a href="/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn loggedIn" data-id="${pin.id}">Rediger</a>`;
   const row = document.createElement("tr");
+  const date = new Date(pin.date);
+  const formatted = new Intl.DateTimeFormat("no-NB", {
+    dateStyle: "full",
+  }).format(date);
   row.innerHTML = `
     <td>${pin.name}</td>
     <td>${pin.weight}</td>
     <td>${pin.length}</td>
-    <td>${pin.bait}</td>
-    <td>${pin.date}</td>
+    <td>${capitalizeFirstLetter(pin.bait)}</td>
+    <td>${pin.baitInfo ? pin.baitInfo : "Ukjent"}</td>
+    <td>${capitalizeFirstLetter(formatted)}</td>
     <td>
   ${
     pin.image
-      ? `<a href="/images/${pin.image}" target="_blank">
-           <img style="width: 75px; height: 75px; object-fit: contain;" src="/images/${pin.image}">
+      ? `<a href="${pin.image}" target="_blank">
+           <img style="width: 75px; height: 75px; object-fit: contain;" src="${pin.image}">
          </a>`
       : "Ingen bilde"
   }
@@ -130,7 +142,7 @@ function addMarker(pin) {
        
         <tr>
         <td class="light-text">Agn:</td>
-        <td>${pin.bait}</td>
+        <td>${capitalizeFirstLetter(pin.bait)}</td>
         </tr>
         <tr>
         <td class="light-text">Fisker:</td>
@@ -143,8 +155,8 @@ function addMarker(pin) {
     </table>
   ${
     pin.image
-      ? `<a href="/images/${pin.image}" target="_blank">
-           <img style="width: 75px; height: 75px; object-fit: contain;" src="/images/${pin.image}">
+      ? `<a href="${pin.image}" target="_blank">
+           <img style="width: 75px; height: 75px; object-fit: contain;" src="${pin.image}">
          </a>`
       : ""
   }
