@@ -10,34 +10,36 @@
     <%- include('./partials/navbar.ejs') %>
 
     <div id="map"></div>
-    <div class="input-group">
-      <div class="searchContainer">
-        <input
-          id="searchInput"
-          type="search"
-          class="form-control rounded"
-          placeholder="Søk etter navn"
-          aria-label="Search"
-          aria-describedby="search-addon"
-        />
-        <button
-          id="searchButton"
-          type="button"
-          class="btn btn-outline-primary"
-          data-mdb-ripple-init
-        >
-          Søk
-        </button>
-      </div>
-      <div class="filters">
-        <h5>Filtrer år:</h5>
-        <div>
-          <input type="checkbox" id="input2024" name="2024" />
-          <label for="2024">2024</label>
+    <div class="center-container">
+      <div class="input-group">
+        <div class="searchContainer">
+          <input
+            id="searchInput"
+            type="search"
+            class="form-control rounded"
+            placeholder="Søk etter navn"
+            aria-label="Search"
+            aria-describedby="search-addon"
+          />
+          <button
+            id="searchButton"
+            type="button"
+            class="btn btn-outline-primary"
+            data-mdb-ripple-init
+          >
+            Søk
+          </button>
         </div>
-        <div>
-          <input type="checkbox" id="input2025" name="2025" checked />
-          <label for="2025">2025</label>
+        <div class="filters">
+          <h5>Filtrer år:</h5>
+          <div>
+            <input type="checkbox" id="input2024" name="2024" />
+            <label for="2024">2024</label>
+          </div>
+          <div>
+            <input type="checkbox" id="input2025" name="2025" checked />
+            <label for="2025">2025</label>
+          </div>
         </div>
       </div>
     </div>
@@ -55,7 +57,9 @@
             <th>Agn</th>
             <th>Dato</th>
             <th>Bilde</th>
-            <th class="loggedIn">Rediger</th>
+            <% if (user && user.role === "admin") { %>
+            <th class="isAdmin">Rediger</th>
+            <% } %>
           </tr>
         </thead>
         <tbody id="salmon-table-body"></tbody>

@@ -78,7 +78,10 @@ function addTableRow(pin) {
   console.log(pin);
 
   const table = document.getElementById("salmon-table-body");
-  const editButton = `<a href="/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn loggedIn" data-id="${pin.id}">Rediger</a>`;
+  const editButton =
+    user && user.role === "admin"
+      ? `<a href="/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn loggedIn" data-id="${pin.id}">Rediger</a>`
+      : "";
   const row = document.createElement("tr");
   const date = new Date(pin.date);
   const formatted = new Intl.DateTimeFormat("no-NB", {
@@ -129,6 +132,10 @@ function addMarker(pin) {
   marker.setIcon(markerIcon);
   console.log(marker);
   markers.push(marker);
+  const date = new Date(pin.date);
+  const formatted = new Intl.DateTimeFormat("no-NB", {
+    dateStyle: "full",
+  }).format(date);
   marker.bindPopup(
     `<table class="popupTable"> 
      <tr>
@@ -150,7 +157,7 @@ function addMarker(pin) {
         </tr>
         <tr>
         <td class="light-text">Dato:</td>
-        <td>${pin.date}</td>
+        <td>${capitalizeFirstLetter(formatted)}</td>
         </tr>
     </table>
   ${
