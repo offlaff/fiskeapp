@@ -76,9 +76,13 @@ app.use(
   })
 );
 
+const coords = {
+  center: [process.env.CENTER_LAT, process.env.CENTER_LNG],
+  northeast: [process.env.NORTHEAST_LAT, process.env.NORTHEAST_LNG],
+  southwest: [process.env.SOUTHWEST_LAT, process.env.SOUTHWEST_LNG],
+};
 app.get("/", getAuth, function (req, res, next) {
-  console.log(req.user);
-  res.render("index", { title: "Express", user: req.user });
+  res.render("index", { title: "Express", user: req.user, coords });
 });
 
 app.get("/logout", getAuth, function (req, res, next) {
@@ -106,7 +110,7 @@ app.post("/init", async function (req, res) {
 
 app.get("/edit/:id", async function (req, res) {
   const pin = await db.pins.findByPk(parseInt(req.params.id));
-  res.render("editFish", { pin });
+  res.render("editFish", { pin, coords });
 });
 
 app.get("/login", function (req, res, next) {
@@ -116,18 +120,15 @@ app.get("/register", function (req, res, next) {
   res.render("register", { title: "Express", user: req.user });
 });
 app.get("/submitFish", function (req, res, next) {
-  res.render("submitFish", { title: "Express", user: req.user });
+  res.render("submitFish", { title: "Express", user: req.user, coords });
 });
 
 app.get("/addFish", function (req, res, next) {
-  res.render("addFish", { title: "Express", user: req.user });
+  res.render("addFish", { title: "Express", user: req.user, coords });
 });
 
 app.get("/addFishUser", function (req, res, next) {
   res.render("addFishUser", { title: "Express", user: req.user });
 });
 
-app.get("/editFishUser", function (req, res, next) {
-  res.render("editFishUser", { title: "Express", user: req.user });
-});
 module.exports = app;

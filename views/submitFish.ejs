@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+        window.coords = <%- JSON.stringify(coords) %>;
+        window.coords.northeast = window.coords.northeast.map((cord) => {
+         return parseFloat(cord)
+        })
+        window.coords.southwest = window.coords.southwest.map((cord) => {
+         return parseFloat(cord)
+        })
+  
+        window.coords.center = window.coords.center.map((cord) => {
+         return parseFloat(cord)
+        })
+        console.log(window.coords)
+      </script>
     <%- include('./partials/head.ejs') %>
   </head>
   <body>
@@ -145,13 +159,13 @@
         }
       });
       function initMap() {
-        const northEast = L.latLng(59.462346, 6.40663);
-  const southWest = L.latLng(59.451664, 6.360802);
+        const northEast = L.latLng(...window.coords.northeast);
+  const southWest = L.latLng(...window.coords.southwest);
   map = L.map("map", {
     zoomControl: false,
     maxBounds: L.latLngBounds(southWest, northEast),
     minZoom: 14,
-  }).setView([59.456599116158394, 6.3862352690536195], zoomLevel);
+  }).setView(window.coords.center, zoomLevel);
         map.doubleClickZoom.disable();
         map.boxZoom.disable();
         map.keyboard.disable();

@@ -18,7 +18,6 @@ const imgStorage = multer.diskStorage({
       null,
       file.fieldname + "_" + Date.now() + path.extname(file.originalname)
     );
-    // file.fieldname is name of the field (image), path.extname get the uploaded file extension
   },
 });
 

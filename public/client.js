@@ -4,20 +4,25 @@ let templocation = 0;
 const zoomLevel = 15.5;
 let markers = [];
 let user = null;
-const clusterGroup = new L.MarkerClusterGroup({
+
+const clusterGroupOptions = {
   zoomToBoundsOnClick: true,
   showCoverageOnHover: false,
   maxClusterRadius: 80,
+};
+
+const clusterGroup = new L.MarkerClusterGroup({
+  ...clusterGroupOptions,
 });
 
 function initMap() {
-  const northEast = L.latLng(59.462346, 6.40663);
-  const southWest = L.latLng(59.451664, 6.360802);
+  const northEast = L.latLng(...window.coords.northeast);
+  const southWest = L.latLng(...window.coords.southwest);
   map = L.map("map", {
     zoomControl: false,
     maxBounds: L.latLngBounds(southWest, northEast),
     minZoom: 14,
-  }).setView([59.456599116158394, 6.3862352690536195], zoomLevel);
+  }).setView(window.coords.center, zoomLevel);
 
   // map.touchZoom.disable(); disable for telefonbrukerar?
   map.doubleClickZoom.disable();
