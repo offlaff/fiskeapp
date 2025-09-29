@@ -97,7 +97,7 @@ function addTableRow(pin) {
     <td>${pin.weight}</td>
     <td>${pin.length}</td>
     <td>${capitalizeFirstLetter(pin.bait)}</td>
-    <td>${pin.baitInfo ? pin.baitInfo : "Ukjent"}</td>
+    <td>${pin.baitInfo ? pin.baitInfo : "Ikke gitt"}</td>
     <td>${capitalizeFirstLetter(formatted)}</td>
     <td>
   ${
@@ -312,8 +312,27 @@ async function executeSearch() {
       clusterGroup.addLayer(clusterItem);
     });
     map.addLayer(clusterGroup);
+    getAvgWeight(results);
     hideLoggedInElements();
   }
+}
+
+function getAvgWeight(pinsList) {
+  // Get or create container for average
+  let avgEl = document.getElementById("avgWeight");
+  const numbers = pinsList
+    .map((pin) => Number(pin.weight))
+    .filter((num) => Number.isFinite(num));
+
+  if (numbers.length === 0) {
+    avgEl.textContent = "Snittvekt: —";
+    return;
+  }
+
+  const sum = numbers.reduce((a, b) => a + b, 0);
+  const avg = sum / numbers.length;
+
+  avgEl.textContent = `Snittvekt: ${avg.toFixed(2)}kg`;
 }
 
 document
