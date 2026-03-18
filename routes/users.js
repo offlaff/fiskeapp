@@ -6,9 +6,14 @@ const AuthService = require("../services/authService");
 const authService = new AuthService();
 const { isAuth } = require("../middleware/auth");
 const passport = require("passport");
+const { getValdFromParam } = require("../middleware/vald");
+
+// lagre på hvilken side en bruker blir laget på
+// bruk samme middleware og /s/:site/users
 
 router.post("/register", async function (req, res) {
-  const response = authService.validateRegistration(req.body);
+  // satt await her så funka det nesten, bare får null verdi på valdId
+  const response = await authService.validateRegistration(req.body);
   if (!response.success) {
     return res.status(400).json({ error: response.errors });
   }
@@ -16,6 +21,7 @@ router.post("/register", async function (req, res) {
     const token = await authService.registerUser({
       ...req.body,
       role: "user",
+      valdId: req.valdId,
     });
     return res.status(201).json({
       message: "User registered successfully",

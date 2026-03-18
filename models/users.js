@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     users.hasMany(models.pins, {
       foreignKey: "userId",
     });
+    users.belongsTo(models.vald, { foreignKey: "valdId" });
   };
   return users;
 };

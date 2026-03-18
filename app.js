@@ -17,6 +17,7 @@ var cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const { isAdmin, getAuth } = require("./middleware/auth");
 const fileUpload = require("express-fileupload");
+const { getValdFromParam } = require("./middleware/vald");
 
 app.use(
   session({
@@ -24,12 +25,11 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: new SQLiteStore(),
-  })
+  }),
 );
 (async () => {
-  const { createUploadthing, createRouteHandler } = await import(
-    "uploadthing/express"
-  );
+  const { createUploadthing, createRouteHandler } =
+    await import("uploadthing/express");
   const f = createUploadthing();
   const uploadRouter = {
     // Define as many FileRoutes as you like, each with a unique routeSlug
@@ -51,7 +51,7 @@ app.use(
     createRouteHandler({
       router: uploadRouter,
       config: {},
-    })
+    }),
   );
 })();
 
@@ -63,8 +63,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/users", authRoutes);
-app.use("/pins", pinRoutes);
+app.use("/s/:site/users", getValdFromParam, authRoutes);
+app.use("/s/:site/pins", getValdFromParam, pinRoutes);
 
 app.use(cookieParser());
 app.set("views", path.join(__dirname, "views"));
@@ -73,7 +73,7 @@ app.set("view engine", "ejs");
 app.use(
   fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 },
-  })
+  }),
 );
 
 const coords = {
@@ -81,13 +81,38 @@ const coords = {
   northeast: [process.env.NORTHEAST_LAT, process.env.NORTHEAST_LNG],
   southwest: [process.env.SOUTHWEST_LAT, process.env.SOUTHWEST_LNG],
 };
-app.get("/", getAuth, function (req, res, next) {
-  res.render("index", { title: "Express", user: req.user, coords });
+
+// temporary fix, add index site later
+// app.get("/", getAuth, function (req, res, next) {
+//   res.render("index", {
+//     title: "Express",
+//     user: req.user,
+//     coords,
+//     site: req.params.site,
+//   });
+// });
+
+app.get("/", (req, res) => {
+  res.redirect("/s/kvaestad");
 });
 
-app.get("/logout", getAuth, function (req, res, next) {
-  res.render("logout", { title: "Express", user: req.user });
+app.get("/s/:site", getValdFromParam, function (req, res, next) {
+  res.render("index", {
+    title: "Express",
+    user: req.user,
+    coords,
+    site: req.params.site,
+  });
 });
+
+app.get(
+  "/s/:site/logout",
+  getAuth,
+  getValdFromParam,
+  function (req, res, next) {
+    res.render("logout", { title: "Express", user: req.user });
+  },
+);
 db.sequelize
   .sync({ alter: true })
   .then(() => {})
@@ -103,32 +128,55 @@ app.post("/init", async function (req, res) {
     email: process.env.ADMIN_EMAIL,
     password: hashedPassword,
     role: "admin",
+    valdId: 1,
   };
   await db.users.create(adminUser, { ignoreDuplicates: true });
   res.status(200).json({ success: true });
 });
 
-app.get("/edit/:id", async function (req, res) {
+app.get("/s/:site/edit/:id", async function (req, res) {
   const pin = await db.pins.findByPk(parseInt(req.params.id));
-  res.render("editFish", { pin, coords });
+  res.render("editFish", { pin, coords, site: req.params.site });
 });
 
-app.get("/login", function (req, res, next) {
-  res.render("login", { title: "Express", user: req.user });
+app.get("/s/:site/login", getValdFromParam, function (req, res, next) {
+  res.render("login", {
+    title: "Express",
+    user: req.user,
+    site: req.params.site,
+  });
 });
-app.get("/register", function (req, res, next) {
-  res.render("register", { title: "Express", user: req.user });
+app.get("/s/:site/register", getValdFromParam, function (req, res, next) {
+  res.render("register", {
+    title: "Express",
+    user: req.user,
+    site: req.params.site,
+  });
 });
-app.get("/submitFish", function (req, res, next) {
-  res.render("submitFish", { title: "Express", user: req.user, coords });
+app.get("/s/:site/submitFish", getValdFromParam, function (req, res, next) {
+  res.render("submitFish", {
+    title: "Express",
+    user: req.user,
+    coords,
+    site: req.params.site,
+  });
 });
 
-app.get("/addFish", function (req, res, next) {
-  res.render("addFish", { title: "Express", user: req.user, coords });
+app.get("/s/:site/addFish", getValdFromParam, function (req, res, next) {
+  res.render("addFish", {
+    title: "Express",
+    user: req.user,
+    coords,
+    site: req.params.site,
+  });
 });
 
-app.get("/addFishUser", function (req, res, next) {
-  res.render("addFishUser", { title: "Express", user: req.user });
+app.get("/s/:site/addFishUser", getValdFromParam, function (req, res, next) {
+  res.render("addFishUser", {
+    title: "Express",
+    user: req.user,
+    site: req.params.site,
+  });
 });
 
 module.exports = app;

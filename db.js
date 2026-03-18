@@ -11,12 +11,12 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     dialect: "mysql",
     port: process.env.DB_PORT,
-  }
+  },
 );
 
 const db = {};
 const directory = path.join(__dirname, "models");
-console.log("tissefant");
+
 console.log(directory);
 console.log(__dirname);
 fs.readdirSync(directory)

@@ -44,7 +44,7 @@
           password: document.querySelector("#password").value,
         };
         console.log(body);
-        fetch("/users/login", {
+        fetch("/s/<%= site %>/users/login", {
           method: "POST",
           body: JSON.stringify(body),
           headers: { "Content-Type": "application/json" },
@@ -58,7 +58,7 @@
               return;
             }
             localStorage.setItem("token", data.token);
-            window.location.href = "/";
+            window.location.href = "/s/<%= site %>/";
           });
         return false;
       });

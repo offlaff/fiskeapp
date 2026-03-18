@@ -47,9 +47,12 @@
       <button class="btn btn-primary" type="submit">Registrer</button>
 
       <hr />
-      <p class="help">Har du allerede bruker? <a href="/login">Logg inn</a></p>
+      <p class="help">
+        Har du allerede bruker? <a href="/s/<%= site %>/login">Logg inn</a>
+      </p>
     </section>
     <script>
+      const site = "<%= site %>";
       const submitBtn = document.querySelector("button");
       submitBtn.addEventListener("click", () => {
         const body = {
@@ -58,9 +61,11 @@
           email: document.querySelector("#email").value,
           password: document.querySelector("#password").value,
         };
+
         let jsonBody = JSON.stringify(body);
         console.log(jsonBody, body);
-        fetch("/users/register", {
+        // usikker
+        fetch(`/s/${site}/users/register`, {
           method: "POST",
           body: jsonBody,
           headers: {
@@ -69,13 +74,14 @@
         })
           .then((response) => {
             return response.json();
+            console.log(response);
           })
           .then((data) => {
             console.log(data);
             if (data.error) {
               alert(data.error);
             } else {
-              window.location.href = "/";
+              window.location.href = `/s/${site}/login`;
             }
           });
       });

@@ -10,15 +10,13 @@ module.exports = function (passport) {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       try {
-        console.log(db);
         const user = (
           await db.sequelize.query(`SELECT * FROM users WHERE username=?;`, {
             replacements: [username],
             type: QueryTypes.SELECT,
           })
         )[0];
-        console.log("tissefant");
-        console.log(user);
+
         if (!user) {
           return done(null, false, {
             message: "Incorrect username or password.",
@@ -33,7 +31,7 @@ module.exports = function (passport) {
       } catch (err) {
         return done(err);
       }
-    })
+    }),
   );
 
   passport.serializeUser(function (user, cb) {

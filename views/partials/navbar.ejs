@@ -1,6 +1,6 @@
 <ul class="nav">
   <li class="nav-item">
-    <a class="nav-link active" href="/">Fangst Kart</a>
+    <a class="nav-link active" href="/s/<%= site %>">Fangst Kart</a>
   </li>
   <!-- <li class="nav-item">
     <a class="nav-link" href="/leilighet">Leig leilighet</a>
@@ -12,19 +12,21 @@
     <a class="nav-link" href="/fishLicense">Fiskekort</a>
   </li> -->
   <li class="nav-item loggedOut" style="margin-left: auto">
-    <a class="nav-link" href="/register">Registrer</a>
+    <a class="nav-link" href="/s/<%= site %>/register">Registrer</a>
   </li>
   <li class="nav-item loggedInAdmin" style="display: none">
-    <a class="nav-link" href="/addFish">Godkjenn fangst</a>
+    <a class="nav-link" href="/s/<%= site %>/addFish">Godkjenn fangst</a>
   </li>
   <li class="nav-item loggedInUser" style="display: none">
-    <a class="nav-link" href="/addFishUser">Din oversikt</a>
+    <a class="nav-link" href="/s/<%= site %>/addFishUser">Din oversikt</a>
   </li>
   <li class="nav-item loggedIn" style="display: none">
-    <a class="nav-link primary-nav-link" href="/submitFish">Legg til fangst</a>
+    <a class="nav-link primary-nav-link" href="/s/<%= site %>/submitFish"
+      >Legg til fangst</a
+    >
   </li>
   <li class="nav-item loggedOut">
-    <a class="nav-link" href="/login">Logg inn</a>
+    <a class="nav-link" href="/s/<%= site %>/login">Logg inn</a>
   </li>
 
   <li class="loggedOut fangstCallOut">Logg inn for å legge inn egen fangst</li>
@@ -32,13 +34,13 @@
     <p class="nav-link">Hello <span class="data-username"> </span></p>
   </li> -->
   <li class="nav-item loggedIn" style="margin-left: auto">
-    <a class="nav-link" href="/logout">Logg ut</a>
+    <a class="nav-link" href="/s/<%= site %>/logout">Logg ut</a>
   </li>
 </ul>
 
 <script>
   async function hideLoggedInElements() {
-    const response = await fetch("/users/me", {
+    const response = await fetch("/s/<%= site %>/users/me", {
       headers: { authorization: `Bearer ${localStorage.getItem("token")}` },
     });
     if (response.status !== 200) {

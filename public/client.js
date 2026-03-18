@@ -4,6 +4,12 @@ let templocation = 0;
 const zoomLevel = 15.5;
 let markers = [];
 let user = null;
+const site = window.location.pathname.split("/")[2];
+
+const myFetch = (url, config) => {
+  const modifiedUrl = `/s/${site}${url}`;
+  return fetch(modifiedUrl, config);
+};
 
 const clusterGroupOptions = {
   zoomToBoundsOnClick: true,
@@ -34,13 +40,17 @@ function initMap() {
     attribution:
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
-  executeSearch();
   map.on("click", onMapClick);
 }
-initMap();
+async function start() {
+  initMap();
+  await getMe();
+  await executeSearch();
+}
+start();
 
 async function getMe() {
-  const response = await fetch("/users/me", {
+  const response = await myFetch("/users/me", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -53,9 +63,9 @@ async function getMe() {
     console.log("is not logged in");
   }
 }
-getMe();
+
 function getPins() {
-  fetch("/pins")
+  myFetch("/pins")
     .then((a) => {
       return a.json();
     })
@@ -64,7 +74,6 @@ function getPins() {
       onGotPins();
     });
 }
-
 function onGotPins() {
   pins.forEach((pin) => {
     // addMarker(pin);
@@ -85,20 +94,30 @@ function addTableRow(pin) {
   const table = document.getElementById("salmon-table-body");
   const editButton =
     user && user.role === "admin"
-      ? `<a href="/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn loggedIn" data-id="${pin.id}">Rediger</a>`
+      ? `<a href="/s/${site}/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn loggedIn" data-id="${pin.id}">Rediger</a>`
       : "";
   const row = document.createElement("tr");
   const date = new Date(pin.date);
-  const formatted = new Intl.DateTimeFormat("no-NB", {
-    dateStyle: "full",
-  }).format(date);
+  const isSmallScreen = window.innerWidth < 700;
+  const formatted = new Intl.DateTimeFormat(
+    "no-NB",
+    isSmallScreen
+      ? {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        }
+      : {
+          dateStyle: "full",
+        },
+  ).format(date);
   row.innerHTML = `
     <td>${pin.name}</td>
     <td>${pin.weight}</td>
     <td>${pin.length}</td>
-    <td>${capitalizeFirstLetter(pin.bait)}</td>
-    <td>${pin.baitInfo ? pin.baitInfo : "Ikke gitt"}</td>
-    <td>${capitalizeFirstLetter(formatted)}</td>
+    <td>${capitalizeFirstLetter(pin.bait)}<br> ${pin.baitInfo ? pin.baitInfo : ""}</td>
+    
+    <td class="date">${capitalizeFirstLetter(formatted)}</td>
     <td>
   ${
     pin.image
@@ -115,11 +134,11 @@ function addTableRow(pin) {
 
 document.getElementById("salmon-table-body").addEventListener("click", (e) => {
   const clickedEle = e.target;
-  if (clickedEle.matches("button.edit-btn")) {
+  if (clickedEle.matches(".edit-btn")) {
     e.preventDefault();
     const token = localStorage.getItem("token");
     if (!token) {
-      window.location.href = "/login";
+      window.location.href = `/s/${site}/login`;
       return;
     }
     const pinId = clickedEle.dataset.id;
@@ -168,11 +187,11 @@ function addMarker(pin) {
   ${
     pin.image
       ? `<a href="${pin.image}" target="_blank">
-           <img style="width: 75px; height: 75px; object-fit: contain;" src="${pin.image}">
+           <img style="width: 75px; height: 75px; object-fit: contain; margin: auto;" src="${pin.image}">
          </a>`
       : ""
   }
-    `
+    `,
   );
 }
 
@@ -187,7 +206,7 @@ function onMapClick(location) {
   const modalElement = document.querySelector(".modal");
   // modalElement.style.display = "block";
 }
-document.getElementById("saveBtn").addEventListener("click", () => {
+document.getElementById("saveBtn").addEventListener("click", async () => {
   if (!tempLocation) return;
 
   const image = document.getElementById("image").files[0];
@@ -204,7 +223,8 @@ document.getElementById("saveBtn").addEventListener("click", () => {
     baitInfo: document.getElementById("baitInfo").value,
   };
 
-  savePinToDatabase(createdMarker);
+  await savePinToDatabase(createdMarker);
+  await executeSearch();
 
   document.querySelector(".modal").style.display = "none";
   tempLocation = null;
@@ -234,7 +254,7 @@ async function savePinToDatabase({
     if (image) {
       formData.append("image", image);
     }
-    const response = await fetch("/pins/add-pins", {
+    const response = await myFetch("/pins/add-pins", {
       method: "POST",
       credentials: "same-origin",
       mode: "cors",
@@ -272,6 +292,7 @@ async function executeSearch() {
   const token = localStorage.getItem("token");
   const input2024 = document.querySelector("#input2024");
   const input2025 = document.querySelector("#input2025");
+  const input2026 = document.querySelector("#input2026");
   const years = [];
   if (input2024.checked) {
     years.push(2024);
@@ -279,8 +300,11 @@ async function executeSearch() {
   if (input2025.checked) {
     years.push(2025);
   }
-  console.log(years);
-  const response = await fetch("/pins/search", {
+  if (input2026.checked) {
+    years.push(2026);
+  }
+
+  const response = await myFetch("/pins/search", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -288,10 +312,13 @@ async function executeSearch() {
     },
     body: JSON.stringify({ search: searchInput, year: years }),
   });
-
   const data = await response.json();
-  const results = data.results;
+  if (!response.ok) {
+    console.error("Search failed:", data);
+    return;
+  }
 
+  const results = data.results || [];
   const tableBody = document.getElementById("salmon-table-body");
   tableBody.innerHTML = "";
   markers.forEach((marker) => {
@@ -318,7 +345,6 @@ async function executeSearch() {
 }
 
 function getAvgWeight(pinsList) {
-  // Get or create container for average
   let avgEl = document.getElementById("avgWeight");
   const numbers = pinsList
     .map((pin) => Number(pin.weight))

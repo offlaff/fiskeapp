@@ -2,26 +2,29 @@ var express = require("express");
 const db = require("../db");
 const { QueryTypes } = require("sequelize");
 
+//add vald i queries
+
 class PinService {
   constructor() {}
 
   async searchName(search, years) {
     if (years.length === 0) {
       return await db.sequelize.query(
-        `Select pins.id, pins.baitInfo, pins.image, pins.name, pins.latitude, pins.longitude,
+        `SELECT pins.id, pins.baitInfo, pins.image, pins.name, pins.latitude, pins.longitude,
       pins.length, pins.weight, pins.bait, pins.date
-      from pins where pins.name like :search and pins.published = true; `,
+      FROM pins WHERE pins.name like :search and pins.published = true; `,
         {
           replacements: { search: `%${search}%` },
           type: QueryTypes.SELECT,
-        }
+        },
       );
     } else {
       return await db.sequelize.query(
-        `Select pins.id, pins.baitInfo, pins.image, pins.name, pins.latitude, pins.longitude,
-              pins.length, pins.weight, pins.bait, pins.date
-              from pins where pins.name like :search and SUBSTRING(pins.date, 1, 4) in(:year)
-              and pins.published = true `,
+        `SELECT pins.id, pins.baitInfo, pins.image, pins.name, 
+        pins.latitude, pins.longitude,
+        pins.length, pins.weight, pins.bait, pins.date
+        FROM pins where pins.name like :search and SUBSTRING(pins.date, 1, 4) in(:year)
+              AND pins.published = true `,
         {
           replacements: {
             search: `%${search}%`,
@@ -30,7 +33,7 @@ class PinService {
             }),
           },
           type: QueryTypes.SELECT,
-        }
+        },
       );
     }
   }
@@ -82,9 +85,9 @@ class PinService {
     return pinFromDb;
   }
 
-  async getUserFish(userId) {
+  async getUserFish(userId, valdId) {
     return await db.pins.findAll({
-      where: { userId: userId, published: 0 },
+      where: { userId: userId, published: 0, valdId },
       include: [
         {
           model: db.users,

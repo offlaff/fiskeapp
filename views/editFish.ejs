@@ -115,6 +115,7 @@
     </script>
 
     <script>
+      const site = "<%= site %>";
       let user = null;
       let map = null;
       let templocation = 0;
@@ -130,7 +131,7 @@
 };
 
       async function getCurrentUser() {
-  const response = await fetch("/users/me", {
+  const response = await fetch(`/s/${site}/users/me`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -154,7 +155,7 @@
           }
         } else {
           console.log("is not logged in");
-          window.location.href = "/login"
+          window.location.href = `/s/${site}login`
         }
         }
 
@@ -182,7 +183,7 @@
           formdata.append("image", image);
         }
 
-        const response = await fetch("/pins/edit/" + id, {
+        const response = await fetch(`/s/${site}/pins/edit/` + id, {
           method: "PATCH",
           body: formdata,
           headers: {
@@ -192,7 +193,7 @@
         const data = await response.json();
         if (data.success) {
           alert("Endringer lagret");
-          window.location.href = "/";
+          window.location.href = `/s/${site}`;
         }
       });
       function initMap() {
