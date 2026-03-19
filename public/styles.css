@@ -27,8 +27,6 @@ body {
     width: 100%;
     align-items: center;
     gap: var(--size-4);
-
-
 }
 
 
@@ -224,8 +222,8 @@ th {
         
     }
     & img {
-        min-height: 120px;
-        max-height: 170px;
+        min-height: 100px;
+        max-height: 150px;
         object-fit: contain;
         width: 100%;
         object-position: center;

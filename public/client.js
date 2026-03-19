@@ -40,7 +40,6 @@ function initMap() {
     attribution:
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
-  map.on("click", onMapClick);
 }
 async function start() {
   initMap();
@@ -77,7 +76,8 @@ function getPins() {
 function onGotPins() {
   pins.forEach((pin) => {
     // addMarker(pin);
-    addTableRow(pin);
+    // addTableRow(pin);
+    addCard(pin);
   });
 }
 
@@ -88,64 +88,65 @@ function capitalizeFirstLetter(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function addTableRow(pin) {
-  console.log(pin);
-
-  const table = document.getElementById("salmon-table-body");
-  const editButton =
-    user && user.role === "admin"
-      ? `<a href="/s/${site}/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn loggedIn" data-id="${pin.id}">Rediger</a>`
-      : "";
-  const row = document.createElement("tr");
+function addCard(pin) {
+  const cardList = document.getElementById("cardList");
   const date = new Date(pin.date);
-  const isSmallScreen = window.innerWidth < 700;
-  const formatted = new Intl.DateTimeFormat(
-    "no-NB",
-    isSmallScreen
-      ? {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-        }
-      : {
-          dateStyle: "full",
-        },
-  ).format(date);
-  row.innerHTML = `
-    <td>${pin.name}</td>
-    <td>${pin.weight}</td>
-    <td>${pin.length}</td>
+  const formattedDate = date.toLocaleDateString("no-NB");
 
-    <td><div style="display: flex; flex-direction: column;"><span>${capitalizeFirstLetter(pin.bait)}</span> ${pin.baitInfo ? `<span class="text-muted">${capitalizeFirstLetter(pin.baitInfo)}</span>` : ""}</div></td>
-    
-    <td class="date">${capitalizeFirstLetter(formatted)}</td>
-    <td>
-  ${
-    pin.image
-      ? `<a href="${pin.image}" target="_blank">
-           <img style="width: 75px; height: 75px; object-fit: cover;" src="${pin.image}">
-         </a>`
-      : "Ingen bilde"
-  }
-</td>
-    <td class="loggedIn">${editButton}</td>
-  `;
-  table.appendChild(row);
-}
+  const fishCard = document.createElement("div");
+  fishCard.className = "fishCard";
 
-document.getElementById("salmon-table-body").addEventListener("click", (e) => {
-  const clickedEle = e.target;
-  if (clickedEle.matches(".edit-btn")) {
-    e.preventDefault();
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = `/s/${site}/login`;
-      return;
+  const leftSide = document.createElement("div");
+  const editBtn = document.createElement("a");
+  editBtn.href = `/s/${site}/edit/${pin.id}`;
+  editBtn.className = "btn btn-warning btn-sm edit-btn ";
+  editBtn.dataset.id = pin.id;
+  editBtn.textContent = "Rediger";
+  const catchInfo = document.createElement("h3");
+  catchInfo.className = "h4";
+  catchInfo.textContent = `${pin.weight}`;
+
+  const dateAndName = document.createElement("h4");
+  dateAndName.className = "h6";
+  dateAndName.textContent = `${pin.name} - ${formattedDate}`;
+
+  const extraCatchInfo = document.createElement("span");
+  extraCatchInfo.className = "h6";
+  extraCatchInfo.innerHTML = `${pin.length} - ${capitalizeFirstLetter(pin.bait)}
+    ${
+      pin.baitInfo
+        ? `<span class="text-muted">${capitalizeFirstLetter(pin.baitInfo)}</span>`
+        : ""
     }
-    const pinId = clickedEle.dataset.id;
-    window.location.href = `/edit/${pinId}`;
+  `;
+  if (user && user.role === "admin") {
+    leftSide.appendChild(editBtn);
   }
-});
+  leftSide.appendChild(catchInfo);
+  leftSide.appendChild(dateAndName);
+  leftSide.appendChild(extraCatchInfo);
+  const rightSide = document.createElement("div");
+
+  if (pin.image) {
+    const catchImage = document.createElement("div");
+    catchImage.style.backgroundImage = `url("${pin.image}")`;
+
+    const imgSrc = document.createElement("img");
+    imgSrc.src = pin.image;
+
+    rightSide.appendChild(catchImage);
+    rightSide.appendChild(imgSrc);
+  } else {
+    rightSide.style.display = "flex";
+    rightSide.style.justifyContent = "center";
+    rightSide.style.alignItems = "center";
+    rightSide.textContent = "Ingen bilde";
+  }
+
+  fishCard.appendChild(leftSide);
+  fishCard.appendChild(rightSide);
+  cardList.appendChild(fishCard);
+}
 
 function addMarker(pin) {
   const marker = L.marker([pin.latitude, pin.longitude]);
@@ -198,40 +199,6 @@ function addMarker(pin) {
 }
 
 let tempLocation = null;
-
-function onMapClick(location) {
-  if (!user) {
-    return;
-  }
-  tempLocation = location.latlng;
-
-  const modalElement = document.querySelector(".modal");
-  // modalElement.style.display = "block";
-}
-document.getElementById("saveBtn").addEventListener("click", async () => {
-  if (!tempLocation) return;
-
-  const image = document.getElementById("image").files[0];
-
-  const createdMarker = {
-    latitude: tempLocation.lat,
-    longitude: tempLocation.lng,
-    name: document.getElementById("name").value,
-    weight: document.getElementById("weight").value,
-    length: document.getElementById("length").value,
-    bait: document.getElementById("bait").value,
-    date: document.getElementById("date").value,
-    image: image,
-    baitInfo: document.getElementById("baitInfo").value,
-  };
-
-  await savePinToDatabase(createdMarker);
-  await executeSearch();
-
-  document.querySelector(".modal").style.display = "none";
-  tempLocation = null;
-});
-
 async function savePinToDatabase({
   latitude,
   longitude,
@@ -286,10 +253,9 @@ function closeBtnClick() {
   const modalElement = document.querySelector(".modal");
   modalElement.style.display = "none";
 }
-closeBtn1.addEventListener("click", closeBtnClick);
-closeBtn2.addEventListener("click", closeBtnClick);
 
 async function executeSearch() {
+  const cardList = document.getElementById("cardList");
   const searchInput = document.getElementById("searchInput").value;
   const token = localStorage.getItem("token");
   const input2024 = document.querySelector("#input2024");
@@ -321,20 +287,19 @@ async function executeSearch() {
   }
 
   const results = data.results || [];
-  const tableBody = document.getElementById("salmon-table-body");
-  tableBody.innerHTML = "";
+  cardList.innerHTML = "";
   markers.forEach((marker) => {
     clusterGroup.removeLayer(marker);
   });
   map.removeLayer(clusterGroup);
   markers = [];
   if (results.length === 0) {
-    tableBody.innerHTML = `<tr><td>Ingen resultat</td></tr>`;
+    cardList.innerHTML = `<tr><td>Ingen resultat</td></tr>`;
   } else {
     results
       .sort((a, b) => b.weight - a.weight)
       .forEach((pin) => {
-        addTableRow(pin);
+        addCard(pin);
         addMarker(pin);
       });
     markers.forEach((clusterItem) => {
