@@ -7,11 +7,12 @@
   <body>
     <%- include('./partials/navbar.ejs') %>
 
-    <div class="prompt">
-      <h1>Logg inn</h1>
-      <section>
-        <label for="username">Brukernavn / E-post</label>
+    <div class="prompt "  style="margin-top: 4rem;">
+      <h1 class="h4" style="margin-bottom: 0.2rem; font-weight: bold;">Logg inn</h1>
+      <div class="input-group">
+        <label for="username" class="text-body-secondary"">Brukernavn / E-post</label>
         <input
+        class="form-control"
           id="username"
           name="username"
           type="text"
@@ -19,9 +20,9 @@
           required
           autofocus
         />
-      </section>
-      <section>
-        <label for="password">Passord</label>
+      </div>
+      <div class="input-group">
+        <label for="password" class="text-body-secondary">Passord</label>
         <input
           id="password"
           name="password"
@@ -29,11 +30,10 @@
           autocomplete="current-password"
           required
         />
-      </section>
-      <button class="btn btn-primary" type="submit" id="signIn">
+      </div>
+      <button class="btn btn-primary btn-lg" type="submit" id="signIn">
         Logg inn
       </button>
-      <hr />
     </div>
     <script>
       const submitBtn = document.querySelector("#signIn");

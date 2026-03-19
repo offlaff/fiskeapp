@@ -115,14 +115,15 @@ function addTableRow(pin) {
     <td>${pin.name}</td>
     <td>${pin.weight}</td>
     <td>${pin.length}</td>
-    <td>${capitalizeFirstLetter(pin.bait)}<br> ${pin.baitInfo ? pin.baitInfo : ""}</td>
+
+    <td><div style="display: flex; flex-direction: column;"><span>${capitalizeFirstLetter(pin.bait)}</span> ${pin.baitInfo ? `<span class="text-muted">${capitalizeFirstLetter(pin.baitInfo)}</span>` : ""}</div></td>
     
     <td class="date">${capitalizeFirstLetter(formatted)}</td>
     <td>
   ${
     pin.image
       ? `<a href="${pin.image}" target="_blank">
-           <img style="width: 75px; height: 75px; object-fit: contain;" src="${pin.image}">
+           <img style="width: 75px; height: 75px; object-fit: cover;" src="${pin.image}">
          </a>`
       : "Ingen bilde"
   }
@@ -161,7 +162,14 @@ function addMarker(pin) {
     dateStyle: "full",
   }).format(date);
   marker.bindPopup(
-    `<table class="popupTable"> 
+    `<div style="display: flex; gap: 1rem; "> ${
+      pin.image
+        ? `<a href="${pin.image}" target="_blank">
+           <img style="width: 75px; height: 75px; object-fit: contain; margin: auto;" src="${pin.image}">
+         </a>`
+        : ""
+    }
+    <table class="popupTable"> 
      <tr>
         <td class="light-text">Vekt:</td>
         <td><strong>${pin.weight}kg</strong></td>
@@ -184,13 +192,7 @@ function addMarker(pin) {
         <td>${capitalizeFirstLetter(formatted)}</td>
         </tr>
     </table>
-  ${
-    pin.image
-      ? `<a href="${pin.image}" target="_blank">
-           <img style="width: 75px; height: 75px; object-fit: contain; margin: auto;" src="${pin.image}">
-         </a>`
-      : ""
-  }
+    </div>
     `,
   );
 }
