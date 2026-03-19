@@ -50,7 +50,7 @@
       <div class="form-group mb-3">
         <label>Informasjon om agn:</label>
         <input
-          id="length"
+          id="baitInfo"
           type="text"
           class="form-control"
           placeholder="Eks. Møresild 16gram"
@@ -134,11 +134,12 @@
         const bait = document.getElementById("bait").value;
         const date = document.getElementById("date").value;
         const image = document.getElementById("image").files[0];
+        const baitInfo = document.getElementById("baitInfo").value;
         const formdata = new FormData();
         formdata.append("name", name);
         formdata.append("weight", weight);
         formdata.append("date", date);
-
+        formdata.append("baitInfo", baitInfo);
         formdata.append("length", length);
         formdata.append("bait", bait);
         formdata.append("lat", pin.latitude);

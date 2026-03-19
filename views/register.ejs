@@ -8,9 +8,9 @@
     <%- include('./partials/navbar.ejs') %>
 
     <section class="prompt">
-      <h1>Registrer bruker</h1>
+      <h1 class="h4" style="font-weight: bold">Registrer bruker</h1>
 
-      <section>
+      <div class="input-group">
         <label for="username">Brukernavn</label>
         <input
           id="username"
@@ -19,8 +19,8 @@
           autocomplete="username"
           required
         />
-      </section>
-      <section>
+      </div>
+      <div class="input-group">
         <label for="fullName">Navn:</label>
         <input
           id="fullName"
@@ -29,8 +29,8 @@
           autocomplete="fullName"
           required
         />
-      </section>
-      <section>
+      </div>
+      <div class="input-group">
         <label for="email">E-post:</label>
         <input
           id="email"
@@ -39,14 +39,13 @@
           autocomplete="email"
           required
         />
-      </section>
-      <section>
+      </div>
+      <div class="input-group">
         <label for="password">Password</label>
         <input id="password" name="password" type="password" required />
-      </section>
-      <button class="btn btn-primary" type="submit">Registrer</button>
+      </div>
+      <button class="btn btn-primary btn-lg" type="submit">Registrer</button>
 
-      <hr />
       <p class="help">
         Har du allerede bruker? <a href="/s/<%= site %>/login">Logg inn</a>
       </p>
