@@ -19,8 +19,72 @@ body {
 #map {
     width: 100%;
     height: 500px;
+}
+
+
+#fishDetailMap {
+    width: 250px;
+    height: 250px;
+}
+
+.fishInformation {
+    display: flex;
+    max-width: 750px;
+    margin: 0 auto;
+    background-color: var(--primary-3);
+    margin-top: 1rem;
+    border-radius: 16px;
+
+    overflow: hidden;
 
 }
+
+.fishText {
+    padding: 1rem;
+    & td {
+        padding-right: 0.5rem;
+        padding-bottom: 0.5rem;
+        min-width: max-content;
+        &:first-child {
+            opacity: 0.8;
+        }
+        &:last-child {
+            opacity: 1;
+       & p, h1 {
+        font-weight: 600;
+       } 
+    } 
+
+    }
+    & p, h1 {
+        margin: 0 !important;
+    }
+}
+.fishPicture {
+  width: 100%;
+  height: 400px;
+  position: relative;
+  overflow: hidden;
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    position: relative;
+    z-index: 2;
+  }
+  & .imgBackDrop{
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+    filter: blur(15px);
+    transform: scale(1.5);
+
+  }
+}
+
+
 .input-group {
     position: relative;
     margin: auto;
@@ -171,7 +235,7 @@ th {
 
 .nav-link.nav-link {
     color: var(--primary-10);
-    font-weight: 500;
+    font-weight: 400;
     &:hover {
         background-color: var(--primary-2);
     }
@@ -203,7 +267,7 @@ th {
     justify-content: center;
     align-items: center;
     padding: var(--size-3);
-    background: var(--primary-3);
+    background: var(--primary-2);
     width: 100%;
     position: sticky;
     top: 0px;
@@ -236,6 +300,14 @@ th {
     width: 100%;
     overflow: hidden;
     max-width: 569px;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease-in-out;
+    &:hover {
+        border: 1px solid var(--primary-4);
+        cursor: pointer;
+        background-color: var(--primary-3);
+        transform: translateY(-1px);
+    }
 
     
     & > div:first-child {

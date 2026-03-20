@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script>
+    window.coords = <%- JSON.stringify(coords) %>;
+    window.coords.northeast = window.coords.northeast.map((cord) => parseFloat(cord));
+    window.coords.southwest = window.coords.southwest.map((cord) => parseFloat(cord));
+    window.coords.center = window.coords.center.map((cord) => parseFloat(cord));
+    console.log(window.coords);
+  </script>
+  <%- include('./partials/head.ejs') %>
+</head>
+
+<body>
+  <%- include('./partials/navbar.ejs') %>
+
+  <div class="fishDetailPage">
+    <div class="fishPicture"></div>
+    <div class="fishInformation">
+      <div id="fishDetailMap"></div>
+      <div class="fishText"></div>
+    </div>
+  </div>
+
+  <script>
+    const pin = <%- JSON.stringify(pin) %>;
+    console.log(pin);
+
+    const site = "<%= site %>";
+    let user = null;
+    let map = null;
+    let templocation = 0;
+    const zoomLevel = 15.5;
+    let markers = [];
+
+    function initMap() {
+      const northEast = L.latLng(...window.coords.northeast);
+      const southWest = L.latLng(...window.coords.southwest);
+      const center = [parseFloat(pin.latitude), parseFloat(pin.longitude)];
+
+      map = L.map("fishDetailMap", {
+        zoomControl: false,
+        maxBounds: L.latLngBounds(southWest, northEast),
+        minZoom: 14,
+      }).setView(center, zoomLevel);
+
+      map.doubleClickZoom.disable();
+      map.boxZoom.disable();
+      map.keyboard.disable();
+
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      addMarker(pin);
+    }
+
+    function addMarker(pin) {
+      const marker = L.marker(
+        [parseFloat(pin.latitude), parseFloat(pin.longitude)], {
+          draggable: false
+        }
+      ).addTo(map);
+
+      const markerIcon = marker.options.icon;
+      const iconSize = 20;
+      markerIcon.options.shadowSize = [0, 0];
+      markerIcon.options.iconAnchor = [9, 20];
+      markerIcon.options.iconSize = [iconSize * 0.7, iconSize];
+      marker.setIcon(markerIcon);
+
+      console.log(marker);
+      markers.push(marker);
+    }
+
+    function fishImage() {
+      const fishPicture = document.querySelector(".fishPicture");
+
+      if (pin.image) {
+        const imgDiv = document.createElement("div");
+        imgDiv.setAttribute("class", "imgBackDrop");
+
+        imgDiv.setAttribute("style", `background-image: url("${pin.image}")`);
+        const img = document.createElement("img");
+        img.src = pin.image;
+        img.alt = "Fish image";
+        fishPicture.appendChild(img);
+        fishPicture.appendChild(imgDiv);
+
+      } else {
+        fishPicture.setAttribute("style", "display: none");
+      }
+    }
+    const fishText = document.querySelector(".fishText");
+    fishText.innerHTML = `
+    
+    <table>
+      <tbody>
+        <tr>
+          <td><h1 class="h4">Vekt:</h1></td>
+          <td><h1 class="h4">${pin.weight}kg</h1></p>
+</td>
+        </tr>
+        <tr>
+          <td><p class="h6">Lengde:</p></td>
+          <td>    <p class="h6"> ${pin.length}cm</p>
+</td>
+        </tr>
+        <tr>
+          <td><p class="h6">Fisker:</p></td>
+          <td>    <p class="h6">${pin.name}</p>
+</td>
+        </tr>
+        <tr>
+          <td><p class="h6">Dato:</p></td>
+          <td>    <p class="h6"> ${pin.date}</p>
+</td>
+        </tr>
+        <tr>
+          <td><p class="h6">Agn:</p></td>
+          <td> <p class="h6"> ${pin.bait}  ${pin.baitInfo ? `(${pin.baitInfo})` : "" }</p>
+</td>
+        </tr>
+      </tbody>
+      </table>
+
+    `
+
+    initMap();
+    fishImage();
+    hideLoggedInElements();
+  </script>
+</body>
+
+</html>

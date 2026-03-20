@@ -179,4 +179,29 @@ app.get("/s/:site/addFishUser", getValdFromParam, function (req, res, next) {
   });
 });
 
+app.get("/s/:site/pin/:id", getValdFromParam, async function (req, res) {
+  try {
+    const pin = await db.pins.findOne({
+      where: {
+        id: parseInt(req.params.id),
+        valdId: req.valdId,
+      },
+    });
+
+    if (!pin) {
+      return res.status(404);
+    }
+
+    res.render("pinDetails", {
+      pin,
+      user: req.user,
+      site: req.params.site,
+      coords,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500);
+  }
+});
+
 module.exports = app;

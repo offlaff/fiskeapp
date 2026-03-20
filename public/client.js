@@ -83,7 +83,7 @@ function onGotPins() {
 
 function capitalizeFirstLetter(str) {
   if (str.length === 0) {
-    return ""; // Handle empty strings
+    return "";
   }
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -95,7 +95,12 @@ function addCard(pin) {
 
   const fishCard = document.createElement("div");
   fishCard.className = "fishCard";
+  fishCard.setAttribute("role", "link");
+  const cardUrl = `/s/${site}/pin/${pin.id}`;
 
+  fishCard.addEventListener("click", () => {
+    window.location.href = cardUrl;
+  });
   const leftSide = document.createElement("div");
   const editBtn = document.createElement("a");
   editBtn.href = `/s/${site}/edit/${pin.id}`;
@@ -331,7 +336,13 @@ function getAvgWeight(pinsList) {
 document
   .getElementById("searchButton")
   .addEventListener("click", executeSearch);
-
-["input2024", "input2025", "input2026"].forEach((year) => {
-  document.getElementById(year).addEventListener("change", executeSearch);
-});
+document
+  .getElementById("searchInput")
+  .addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      executeSearch();
+    }
+  })
+  [("input2024", "input2025", "input2026")].forEach((year) => {
+    document.getElementById(year).addEventListener("change", executeSearch);
+  });
