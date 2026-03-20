@@ -104,7 +104,7 @@ function addCard(pin) {
   editBtn.textContent = "Rediger";
   const catchInfo = document.createElement("h3");
   catchInfo.className = "h4";
-  catchInfo.textContent = `${pin.weight}`;
+  catchInfo.textContent = `${pin.weight}kg`;
 
   const dateAndName = document.createElement("h4");
   dateAndName.className = "h6";
@@ -112,7 +112,7 @@ function addCard(pin) {
 
   const extraCatchInfo = document.createElement("span");
   extraCatchInfo.className = "h6";
-  extraCatchInfo.innerHTML = `${pin.length} - ${capitalizeFirstLetter(pin.bait)}
+  extraCatchInfo.innerHTML = `${pin.length}cm - ${capitalizeFirstLetter(pin.bait)}
     ${
       pin.baitInfo
         ? `<span class="text-muted">${capitalizeFirstLetter(pin.baitInfo)}</span>`
@@ -331,3 +331,7 @@ function getAvgWeight(pinsList) {
 document
   .getElementById("searchButton")
   .addEventListener("click", executeSearch);
+
+["input2024", "input2025", "input2026"].forEach((year) => {
+  document.getElementById(year).addEventListener("change", executeSearch);
+});

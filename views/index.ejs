@@ -21,56 +21,43 @@
     <%- include('./partials/navbar.ejs') %>
 
     <div id="map"></div>
-    <div class="center-container">
-      <div class="input-group">
-        <div class="searchContainer">
-          <input
-            id="searchInput"
-            type="search"
-            class="form-control rounded"
-            placeholder="Søk etter navn"
-            aria-label="Search"
-            aria-describedby="search-addon"
-          />
-          <button
-            id="searchButton"
-            type="button"
-            class="btn btn-outline-primary"
-            data-mdb-ripple-init
-          >
-            Søk
-          </button>
+
+    <div class="filter-bar-container">
+      <div class="searchContainer">
+        <input
+          id="searchInput"
+          type="search"
+          class="form-control rounded"
+          placeholder="Søk etter navn"
+          aria-label="Search"
+          aria-describedby="search-addon"
+        />
+        <button
+          id="searchButton"
+          type="button"
+          class="btn btn-app"
+          data-mdb-ripple-init
+        >
+          Søk
+        </button>
+      </div>
+      <div class="filters">
+        <div>
+          <input type="checkbox" id="input2024" name="2024" />
+          <label for="2024">2024</label>
         </div>
-        <div class="filters">
-          <h5>Filtrer år:</h5>
-          <div>
-            <input type="checkbox" id="input2024" name="2024" />
-            <label for="2024">2024</label>
-          </div>
-          <div>
-            <input type="checkbox" id="input2025" name="2025" checked />
-            <label for="2025">2025</label>
-          </div>
-          <div>
-            <input type="checkbox" id="input2026" name="2026" checked />
-            <label for="2026">2026</label>
-          </div>
+        <div>
+          <input type="checkbox" id="input2025" name="2025" checked />
+          <label for="2025">2025</label>
+        </div>
+        <div>
+          <input type="checkbox" id="input2026" name="2026" checked />
+          <label for="2026">2026</label>
         </div>
       </div>
     </div>
-    <h5 id="avgWeight" class="text-center mb-4"></h5>
-    <div
-      id="cardList"
-      style="
-        max-width: 900px;
-        margin: 0 auto;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
-      "
-    >
+    <h5 id="avgWeight" class="text-center mb-3 mt-3 text-faded h6"></h5>
+    <div id="cardList">
       <div class="fishCard">
         <div>
           <h3 class="h4">Flyndre, 22kg</h3>

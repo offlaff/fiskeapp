@@ -35,7 +35,19 @@ body {
     display: flex;   
     max-width: 400px;
     min-width: 200px;  
+    border: 1px solid var(--primary-4);
+    border-radius: 3px;
+    overflow: hidden;
     flex: 2;
+    & > input {
+        border-top-right-radius: 0px !important;
+        border-bottom-right-radius: 0px !important;
+    }
+     & > .btn-app.btn {
+        border-top-left-radius: 0px !important;
+        border-bottom-left-radius: 0px !important;
+        border-color: transparent !important;
+    }
 }
 
 #searchButton {
@@ -185,7 +197,37 @@ th {
     width: 100%
 }
 
+.filter-bar-container {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    padding: var(--size-3);
+    background: var(--primary-3);
+    width: 100%;
+    position: sticky;
+    top: 0px;
+    z-index: 3;
+}
 
+.btn-app.btn {
+    background-color: var(--primary-2);
+    &:hover {
+        background-color: var(--primary-4);
+    }
+}
+
+
+#cardList {
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    flex-wrap: wrap;  
+    align-items: center;
+    justify-content: center;
+}
 
 .fishCard {
     display: flex;
@@ -193,6 +235,8 @@ th {
     border-radius: 16px;
     width: 100%;
     overflow: hidden;
+    max-width: 569px;
+
     
     & > div:first-child {
         flex: 2;
