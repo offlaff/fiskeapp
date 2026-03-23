@@ -26,7 +26,8 @@ const upload = multer({ storage: imgStorage });
 
 router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
   let image;
-  const { lat, lng, length, weight, bait, name, date, baitInfo } = req.body;
+  const { lat, lng, length, weight, bait, name, date, baitInfo, speciesId } =
+    req.body;
 
   const { success, errors } = pinService.validatePin({
     name,
@@ -34,11 +35,13 @@ router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
     length,
     bait,
     date,
+    speciesId,
   });
 
   if (!success) {
     return res.status(400).json({ success: false, errors });
   }
+
   if (req.file) {
     const uploadedimage = await uploadImage(req.file.filename);
     console.log("got image:", uploadedimage);
@@ -46,6 +49,7 @@ router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
       image = uploadedimage.url;
     }
   }
+
   const parsedWeight = parseFloat(weight?.replace(",", "."));
   const parsedLength = parseFloat(length?.replace(",", "."));
 
@@ -55,17 +59,20 @@ router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
       longitude: lng,
       length: parsedLength,
       weight: parsedWeight,
-      bait: bait,
-      name: name,
-      date: date,
+      bait,
+      name,
+      date,
       published: false,
-      image: image,
-      baitInfo: baitInfo,
+      image,
+      baitInfo,
       userId: req.user.id,
       valdId: req.valdId,
+      speciesId: speciesId,
     });
+
     res.json({ success: true, pin: result });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false });
   }
 });
@@ -117,7 +124,7 @@ router.post("/search", async function (req, res) {
 
     res.status(200).json({ results: results, totalResults: results.length });
   } catch {
-    console.log("Søk feila");
+    console.log("Søk feila", error);
     res.status(500).json({ message: "søk feilet" });
   }
 });
@@ -161,6 +168,7 @@ router.patch(
         baitInfo: rawPin.baitInfo,
         published: rawPin.published,
         valdId: req.valdId,
+        speciesId: rawPin.speciesId,
       };
 
       const response = pinService.validatePin(newPin);

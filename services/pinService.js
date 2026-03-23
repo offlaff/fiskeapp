@@ -7,30 +7,42 @@ const { QueryTypes } = require("sequelize");
 class PinService {
   constructor() {}
 
-  async searchName(search, years) {
-    if (years.length === 0) {
+  async searchName(search, years, valdId) {
+    if (!years || years.length === 0) {
       return await db.sequelize.query(
         `SELECT pins.id, pins.baitInfo, pins.image, pins.name, pins.latitude, pins.longitude,
-      pins.length, pins.weight, pins.bait, pins.date
-      FROM pins WHERE pins.name like :search and pins.published = true; `,
+      pins.length, pins.weight, pins.bait, pins.date, pins.speciesId,
+      species.name AS speciesName
+      FROM pins
+      LEFT JOIN species ON pins.speciesId = species.id
+      WHERE pins.name LIKE :search
+      AND pins.published = true
+      AND pins.valdId = :valdId;`,
         {
-          replacements: { search: `%${search}%` },
+          replacements: {
+            search: `%${search}%`,
+            valdId,
+          },
           type: QueryTypes.SELECT,
         },
       );
     } else {
       return await db.sequelize.query(
-        `SELECT pins.id, pins.baitInfo, pins.image, pins.name, 
-        pins.latitude, pins.longitude,
-        pins.length, pins.weight, pins.bait, pins.date
-        FROM pins where pins.name like :search and SUBSTRING(pins.date, 1, 4) in(:year)
-              AND pins.published = true `,
+        `SELECT pins.id, pins.baitInfo, pins.image, pins.name,
+      pins.latitude, pins.longitude, pins.length, pins.weight,
+      pins.bait, pins.date, pins.speciesId,
+      species.name AS speciesName
+      FROM pins
+      LEFT JOIN species ON pins.speciesId = species.id
+      WHERE pins.name LIKE :search
+      AND SUBSTRING(pins.date, 1, 4) IN (:year)
+      AND pins.published = true
+      AND pins.valdId = :valdId;`,
         {
           replacements: {
             search: `%${search}%`,
-            year: years.map((year) => {
-              return year.toString();
-            }),
+            year: years.map((year) => year.toString()),
+            valdId,
           },
           type: QueryTypes.SELECT,
         },
@@ -38,7 +50,7 @@ class PinService {
     }
   }
   validatePin(options) {
-    const { name, weight, length, bait, date } = options;
+    const { name, weight, length, bait, date, speciesId } = options;
     const errorArray = [];
     if (!name || typeof name !== "string") {
       errorArray.push({
@@ -63,6 +75,19 @@ class PinService {
         msg: `Gyldig dato må inkluderes, format: YYYY-MM-DD. Mottatt: ${date}`,
       });
     }
+    if (!speciesId) {
+      errorArray.push({ msg: "Fiskeslag må inkluderes" });
+    }
+    if (!bait) {
+      errorArray.push({
+        msg: "Agn må inkluderes",
+      });
+    }
+    if (Number.isNaN(Number(weight))) {
+      errorArray.push({
+        msg: "Vekt må kun være tall, Eks: 13,4",
+      });
+    }
     return {
       success: errorArray.length === 0,
       errors: errorArray,
@@ -78,6 +103,7 @@ class PinService {
     pinFromDb.published = pin.published || pinFromDb.published;
     pinFromDb.latitude = pin.latitude || pinFromDb.latitude;
     pinFromDb.image = pin.image || pinFromDb.image;
+    pinFromDb.speciesId = pin.speciesId || pinFromDb.speciesId;
     pinFromDb.baitInfo = pin.baitInfo || pinFromDb.baitInfo;
 
     pinFromDb.longitude = pin.longitude || pinFromDb.longitude;

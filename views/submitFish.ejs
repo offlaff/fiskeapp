@@ -1,216 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script>
-        window.coords = <%- JSON.stringify(coords) %>;
-        window.coords.northeast = window.coords.northeast.map((cord) => {
-         return parseFloat(cord)
-        })
-        window.coords.southwest = window.coords.southwest.map((cord) => {
-         return parseFloat(cord)
-        })
-  
-        window.coords.center = window.coords.center.map((cord) => {
-         return parseFloat(cord)
-        })
-        console.log(window.coords)
-      </script>
-    <%- include('./partials/head.ejs') %>
-  </head>
-  <body>
-    <%- include('./partials/navbar.ejs') %>
-    <h4 style="padding: 20px; text-align: center;"> Flytt på markeringen til der laksen tok 🐟 </h4>
-    <div id="map"></div>
-    <div class="modal-body center-container">
-      <div class="form-group mb-3">
-        <label>Navn på fisker</label>
-        <input
-          id="name"
-          type="text"
-          class="form-control"
-          placeholder="Ola Nordmann"
-        />
-      </div>
-      <div class="form-group mb-3">
-        <label>Vekt (kg)</label>
-        <input id="weight" type="text" class="form-control" placeholder="4,4" />
-      </div>
-      <div class="form-group mb-3">
-        <label>Lengde (cm)</label>
-        <input id="length" type="text" class="form-control" placeholder="75" />
-      </div>
-      <div class="form-group mb-3">
-        <label>Agn</label>
-        <select class="form-select" id="bait">
-          <option value="flue">Flue</option>
-          <option value="sluk">Sluk</option>
-          <option value="wobbler">Wobbler</option>
-        </select>
-      </div>
-      <div class="form-group mb-3">
-        <label>Informasjon om agn:</label>
-        <input
-          id="baitInfo"
-          type="text"
-          class="form-control"
-          placeholder="Eks. Møresild 16gram"
-        />
-      </div>
-      <div class="form-group mb-3">
-        <label>Dato (YYYY-MM-DD)</label>
-        <input
-          id="date"
-          type="date"
-          class="form-control"
-          placeholder="2025-05-28"
-        />
-      </div>
-      <div class="form-group mb-3">
-        <label>Bilde</label>
-        <input
-          id="image"
-          type="file"
-          class="form-control"
-          accept="image/png, image/jpeg, image/jpg"
-        />
-        </div>
-      </div>
-      <div class=" center-container"style ="padding: 20px; padding-top: 0px;">
-        <button class="btn btn-success " id="save">Send inn til godkjenning</button>
-      </div>
+
+<head>
+  <script>
+    window.coords = <%- JSON.stringify(coords) %>;
+    window.coords.northeast = window.coords.northeast.map((cord) => {
+      return parseFloat(cord)
+    })
+    window.coords.southwest = window.coords.southwest.map((cord) => {
+      return parseFloat(cord)
+    })
+
+    window.coords.center = window.coords.center.map((cord) => {
+      return parseFloat(cord)
+    })
+    console.log(window.coords)
+  </script>
+  <%- include('./partials/head.ejs') %>
+</head>
+
+<body>
+  <%- include('./partials/navbar.ejs') %>
+  <h4 style="padding: 20px; text-align: center;"> Flytt på markeringen til der laksen tok 🐟 </h4>
+  <div id="map"></div>
+  <div class="modal-body center-container">
+    <div class="form-group mb-3">
+      <label>Navn på fisker</label>
+      <input id="name" type="text" class="form-control" placeholder="Ola Nordmann" />
     </div>
-    <script >
-      const site = "<%= site %>";
+    <div class="form-group mb-3">
+      <label>Vekt (kg)</label>
+      <input id="weight" type="text" class="form-control" placeholder="4,4" />
+    </div>
+    <div class="form-group mb-3">
+      <label>Lengde (cm)</label>
+      <input id="length" type="text" class="form-control" placeholder="75" />
+    </div>
+    <div class="form-group mb3">
+      <label for="speciesId">Fiskeslag</label>
+      <select name="speciesId" id="speciesId" class="form-control">
+        <option value="">Velg art</option>
+        <option value="1">Laks</option>
+        <option value="2">Fjellørret</option>
+        <option value="3">Sjøørret</option>
+      </select>
+    </div>
+    <div class="form-group mb-3">
+      <label>Agn</label>
+      <select class="form-select" id="bait">
+        <option value="flue">Flue</option>
+        <option value="sluk">Sluk</option>
+        <option value="wobbler">Wobbler</option>
+      </select>
+    </div>
+    <div class="form-group mb-3">
+      <label>Informasjon om agn:</label>
+      <input id="baitInfo" type="text" class="form-control" placeholder="Eks. Møresild 16gram" />
+    </div>
+    <div class="form-group mb-3">
+      <label>Dato (YYYY-MM-DD)</label>
+      <input id="date" type="date" class="form-control" placeholder="2025-05-28" />
+    </div>
+    <div class="form-group mb-3">
+      <label>Bilde</label>
+      <input id="image" type="file" class="form-control" accept="image/png, image/jpeg, image/jpg" />
+    </div>
+  </div>
+  <div class=" center-container" style="padding: 20px; padding-top: 0px;">
+    <button class="btn btn-success " id="save">Send inn til godkjenning</button>
+  </div>
+  </div>
+  <script>
+    const site = "<%= site %>";
 
-        
-      let pin = {latitude: 59.456599116158394, longitude: 6.3862352690536195 }
-      let user = null;
-      let map = null;
-      let templocation = 0;
-      const zoomLevel = 15.5;
-      let marker = null;
-      window.onload = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          window.location.replace(`/s/${site}/login`);
-          return;
-        }
-        await getMe();
-      };
 
-      async function getCurrentUser() {
-        const response = await fetch(`/s/${site}/users/me`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        const data = await response.json();
-        console.log(data);
-        return data;
+    let pin = {
+      latitude: 59.456599116158394,
+      longitude: 6.3862352690536195
+    }
+    let user = null;
+    let map = null;
+    let templocation = 0;
+    const zoomLevel = 15.5;
+    let marker = null;
+    window.onload = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.replace(`/s/${site}/login`);
+        return;
       }
+      await getMe();
+    };
 
-      async function getMe() {
-        const data = await getCurrentUser();
-        console.log(data);
-        if (data.username) {
-          user = data;
-          if (user.role !== "admin") {
-            const adminCheck = document.getElementById("adminCheck");
-            if (adminCheck) {
-              adminCheck.style.display = "none";
-            }
-          }
-        } else {
-          console.log("is not logged in");
-          window.location.href = `/s/${site}/login`;
-        }
-      }
-
-      const savebtn = document.querySelector("#save");
-      savebtn.addEventListener("click", async () => {
-        const name = document.getElementById("name").value;
-        const weight = document.getElementById("weight").value;
-        const length = document.getElementById("length").value;
-        const bait = document.getElementById("bait").value;
-        const date = document.getElementById("date").value;
-        const image = document.getElementById("image").files[0];
-        const baitInfo = document.getElementById("baitInfo").value;
-        const formdata = new FormData();
-        formdata.append("name", name);
-        formdata.append("weight", weight);
-        formdata.append("date", date);
-        formdata.append("baitInfo", baitInfo);
-        formdata.append("length", length);
-        formdata.append("bait", bait);
-        formdata.append("lat", pin.latitude);
-        formdata.append("lng", pin.longitude);
-        if (image) {
-          formdata.append("image", image);
-        }
-
-        const response = await fetch(`/s/${site}/pins/add-pins/`, {
-          method: "POST",
-          body: formdata,
-          headers: {
-            authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        const data = await response.json();
-        if (data.success) {
-          alert("Fangsten er sendt til godkjenning");
-          window.location.href = `/s/${site}`;
-        }
+    async function getCurrentUser() {
+      const response = await fetch(`/s/${site}/users/me`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      function initMap() {
-        const northEast = L.latLng(...window.coords.northeast);
-  const southWest = L.latLng(...window.coords.southwest);
-  map = L.map("map", {
-    zoomControl: false,
-    maxBounds: L.latLngBounds(southWest, northEast),
-    minZoom: 14,
-  }).setView(window.coords.center, zoomLevel);
-        map.doubleClickZoom.disable();
-        map.boxZoom.disable();
-        map.keyboard.disable();
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-          attribution:
-            '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        }).addTo(map);
-        addMarker(pin);
-        map.on("click", (event) => {
-            pin.latitude = event.latlng.lat
-            pin.longitude = event.latlng.lng
-            addMarker(pin)
+      const data = await response.json();
+      console.log(data);
+      return data;
+    }
 
-            
-        })
-      }
-      initMap();
-
-      function addMarker(pin) {
-        if(marker){
-            map.removeLayer(marker)
+    async function getMe() {
+      const data = await getCurrentUser();
+      console.log(data);
+      if (data.username) {
+        user = data;
+        if (user.role !== "admin") {
+          const adminCheck = document.getElementById("adminCheck");
+          if (adminCheck) {
+            adminCheck.style.display = "none";
+          }
         }
-        marker = L.marker([pin.latitude, pin.longitude], {
-          draggable: true,
-        }).addTo(map);
-
-        const markerIcon = marker.options.icon;
-        const iconSize = 30;
-        markerIcon.options.shadowSize = [0, 0];
-        markerIcon.options.iconAnchor = [9, 20];
-        markerIcon.options.iconSize = [iconSize * 0.7, iconSize];
-        marker.setIcon(markerIcon);
-        marker.on("dragend", function (e) {
-          const newLatLng = e.target.getLatLng();
-          pin.latitude = newLatLng.lat;
-          pin.longitude = newLatLng.lng;
-          console.log(pin.latitude, pin.longitude);
-        });
-
+      } else {
+        console.log("is not logged in");
+        window.location.href = `/s/${site}/login`;
       }
-      hideLoggedInElements();
-    </script>
-  </body>
+    }
+
+    const savebtn = document.querySelector("#save");
+    savebtn.addEventListener("click", async () => {
+      const name = document.getElementById("name").value;
+      const weight = document.getElementById("weight").value;
+      const length = document.getElementById("length").value;
+      const bait = document.getElementById("bait").value;
+      const date = document.getElementById("date").value;
+      const image = document.getElementById("image").files[0];
+      const baitInfo = document.getElementById("baitInfo").value;
+      const speciesId = document.getElementById("speciesId").value;
+      const formdata = new FormData();
+      formdata.append("name", name);
+      formdata.append("weight", weight);
+      formdata.append("date", date);
+      formdata.append("baitInfo", baitInfo);
+      formdata.append("length", length);
+      formdata.append("bait", bait);
+      formdata.append("lat", pin.latitude);
+      formdata.append("lng", pin.longitude);
+      formdata.append("speciesId", speciesId);
+      if (image) {
+        formdata.append("image", image);
+      }
+
+      const response = await fetch(`/s/${site}/pins/add-pins/`, {
+        method: "POST",
+        body: formdata,
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+        alert("Fangsten er sendt til godkjenning");
+        window.location.href = `/s/${site}`;
+      }
+      if (!data.success) {
+        data.errors.forEach(error => {
+          let errors = error.msg
+          return errors
+        });
+        alert(errors);
+      }
+    });
+
+    function initMap() {
+      const northEast = L.latLng(...window.coords.northeast);
+      const southWest = L.latLng(...window.coords.southwest);
+      map = L.map("map", {
+        zoomControl: false,
+        maxBounds: L.latLngBounds(southWest, northEast),
+        minZoom: 14,
+      }).setView(window.coords.center, zoomLevel);
+      map.doubleClickZoom.disable();
+      map.boxZoom.disable();
+      map.keyboard.disable();
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+      addMarker(pin);
+      map.on("click", (event) => {
+        pin.latitude = event.latlng.lat
+        pin.longitude = event.latlng.lng
+        addMarker(pin)
+
+
+      })
+    }
+    initMap();
+
+    function addMarker(pin) {
+      if (marker) {
+        map.removeLayer(marker)
+      }
+      marker = L.marker([pin.latitude, pin.longitude], {
+        draggable: true,
+      }).addTo(map);
+
+      const markerIcon = marker.options.icon;
+      const iconSize = 30;
+      markerIcon.options.shadowSize = [0, 0];
+      markerIcon.options.iconAnchor = [9, 20];
+      markerIcon.options.iconSize = [iconSize * 0.7, iconSize];
+      marker.setIcon(markerIcon);
+      marker.on("dragend", function(e) {
+        const newLatLng = e.target.getLatLng();
+        pin.latitude = newLatLng.lat;
+        pin.longitude = newLatLng.lng;
+        console.log(pin.latitude, pin.longitude);
+      });
+
+    }
+    hideLoggedInElements();
+  </script>
+</body>
+
 </html>

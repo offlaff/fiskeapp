@@ -109,7 +109,7 @@ function addCard(pin) {
   editBtn.textContent = "Rediger";
   const catchInfo = document.createElement("h3");
   catchInfo.className = "h4";
-  catchInfo.textContent = `${pin.weight}kg`;
+  catchInfo.textContent = `${pin.weight}kg - ${pin.speciesName}`;
 
   const dateAndName = document.createElement("h4");
   dateAndName.className = "h6";
