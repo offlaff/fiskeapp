@@ -59,11 +59,11 @@ class PinService {
     }
     const parsedWeight = parseFloat(weight?.replace(",", "."));
     if (!weight || isNaN(parsedWeight)) {
-      errorArray.push({ msg: "Vekt på fisk må være et gyldig tall" });
+      errorArray.push({ msg: "Vekt på fisk må være et gyldig tall, Eks: 5,8" });
     }
     const parsedLength = parseFloat(length?.replace(",", "."));
     if (!length || isNaN(parsedLength)) {
-      errorArray.push({ msg: "Lengde på fisk må være et gyldig tall" });
+      errorArray.push({ msg: "Lengde på fisk skal kun være tall, Eks: 103" });
     }
     if (!bait) {
       errorArray.push({
@@ -87,6 +87,11 @@ class PinService {
       errorArray.push({
         msg: "Vekt må kun være tall, Eks: 13,4",
       });
+      if (Number.isNaN(Number(length))) {
+        errorArray.push({
+          msg: "Lengde må kun være tall, Eks: 104",
+        });
+      }
     }
     return {
       success: errorArray.length === 0,

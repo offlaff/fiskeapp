@@ -285,6 +285,7 @@ async function executeSearch() {
     },
     body: JSON.stringify({ search: searchInput, year: years }),
   });
+
   const data = await response.json();
   if (!response.ok) {
     console.error("Search failed:", data);

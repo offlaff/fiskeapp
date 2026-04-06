@@ -73,14 +73,14 @@ body {
     display: block;
     position: relative;
     z-index: 2;
-  }
+    transition: transform 0.5s ease;
+  } 
   & .imgBackDrop{
     position: absolute;
     inset: 0;
     object-fit: cover;
     filter: blur(15px);
     transform: scale(1.5);
-
   }
 }
 

@@ -36,6 +36,15 @@
       <label>Lengde (cm)</label>
       <input value="<%= pin.length %>" id="length" type="text" class="form-control" placeholder="75" />
     </div>
+    <div class="form-group mb3">
+      <label for="speciesId">Fiskeslag</label>
+      <select name="speciesId" id="speciesId" class="form-control">
+        <option value="">Velg art</option>
+        <option value="1">Laks</option>
+        <option value="2">Fjellørret</option>
+        <option value="3">Sjøørret</option>
+      </select>
+    </div>
     <div class="form-group mb-3">
       <label>Agn</label>
       <select class="form-select" id="bait">
@@ -131,11 +140,12 @@
       const id = document.getElementById("pinId").value;
       const published = document.getElementById("published").checked;
       const image = document.getElementById("image").files[0];
+      const species = document.getElementById("speciesId").value;
       const formdata = new FormData();
       formdata.append("name", name);
       formdata.append("weight", weight);
       formdata.append("date", date);
-
+      formdata.append("speciesId", species);
       formdata.append("length", length);
       formdata.append("bait", bait);
       formdata.append("published", published);

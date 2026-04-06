@@ -1,63 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script>
-      window.coords = <%- JSON.stringify(coords) %>;
-      window.coords.northeast = window.coords.northeast.map((cord) => {
-       return parseFloat(cord)
-      })
-      window.coords.southwest = window.coords.southwest.map((cord) => {
-       return parseFloat(cord)
-      })
 
-      window.coords.center = window.coords.center.map((cord) => {
-       return parseFloat(cord)
-      })
-      console.log(window.coords)
-    </script>
-    <%- include('./partials/head.ejs') %>
-  </head>
-  <body>
-    <%- include('./partials/navbar.ejs') %>
+<head>
+  <script>
+    window.coords = <%- JSON.stringify(coords) %>;
+    window.coords.northeast = window.coords.northeast.map((cord) => {
+      return parseFloat(cord)
+    })
+    window.coords.southwest = window.coords.southwest.map((cord) => {
+      return parseFloat(cord)
+    })
 
-    <div id="map"></div>
+    window.coords.center = window.coords.center.map((cord) => {
+      return parseFloat(cord)
+    })
+    console.log(window.coords)
+  </script>
+  <%- include('./partials/head.ejs') %>
+</head>
 
-    <div class="filter-bar-container">
-      <div class="searchContainer">
-        <input
-          id="searchInput"
-          type="search"
-          class="form-control rounded"
-          placeholder="Søk etter navn"
-          aria-label="Search"
-          aria-describedby="search-addon"
-        />
-        <button
-          id="searchButton"
-          type="button"
-          class="btn btn-app"
-          data-mdb-ripple-init
-        >
-          Søk
-        </button>
+<body>
+  <%- include('./partials/navbar.ejs') %>
+
+  <div id="map"></div>
+
+  <div class="filter-bar-container">
+    <div class="searchContainer">
+      <input id="searchInput" type="search" class="form-control rounded" placeholder="Søk etter navn" aria-label="Search" aria-describedby="search-addon" />
+      <button id="searchButton" type="button" class="btn btn-app" data-mdb-ripple-init>
+        Søk
+      </button>
+    </div>
+    <div class="filters">
+      <div>
+        <input type="checkbox" id="input2024" name="2024" />
+        <label for="2024">2024</label>
       </div>
-      <div class="filters">
-        <div>
-          <input type="checkbox" id="input2024" name="2024" />
-          <label for="2024">2024</label>
-        </div>
-        <div>
-          <input type="checkbox" id="input2025" name="2025" checked />
-          <label for="2025">2025</label>
-        </div>
-        <div>
-          <input type="checkbox" id="input2026" name="2026" checked />
-          <label for="2026">2026</label>
-        </div>
+      <div>
+        <input type="checkbox" id="input2025" name="2025" checked />
+        <label for="2025">2025</label>
+      </div>
+      <div>
+        <input type="checkbox" id="input2026" name="2026" checked />
+        <label for="2026">2026</label>
       </div>
     </div>
-    <h5 id="avgWeight" class="text-center mb-3 mt-3 text-faded h6"></h5>
-    <div id="cardList"></div>
-    <script src="/client.js"></script>
-  </body>
+  </div>
+  <h5 id="avgWeight" class="text-center mb-3 mt-3 text-faded h6"></h5>
+  <div class="btn-group">
+
+    < <ul class="dropdown-menu">
+      <li><button class="dropdown-item" id="sortByDate" type="button">Sist fanget</button></li>
+      <li><button class="dropdown-item" id="sortByLowestWeight" type="button">Lavest vekt</button></li>
+      <li><button class="dropdown-item" id="sortByHighestWeight" type="button">Høyest vekt</button></li>
+      </ul>
+  </div>
+  </div>
+
+  <div id="cardList"></div>
+  <script src="/client.js"></script>
+</body>
+
 </html>
