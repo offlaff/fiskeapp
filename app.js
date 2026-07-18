@@ -3,61 +3,28 @@ const express = require("express");
 const db = require("./db");
 const mysql = require("mysql2");
 const cors = require("cors");
-const passport = require("passport");
 const app = express();
 const PORT = 3000;
 var path = require("path");
-require("./config/auth")(passport);
-const session = require("express-session");
-const flash = require("express-flash");
-const SQLiteStore = require("connect-sqlite3")(session);
 const pinRoutes = require("./routes/pins");
 const authRoutes = require("./routes/users");
 var cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
-const { isAdmin, getAuth } = require("./middleware/auth");
+const { isAdmin, isAuth, getAuth } = require("./middleware/auth");
 const fileUpload = require("express-fileupload");
 const { getValdFromParam } = require("./middleware/vald");
 
-app.use(
-  session({
-    secret: "kuknisse",
-    resave: false,
-    saveUninitialized: false,
-    store: new SQLiteStore(),
-  }),
-);
-(async () => {
-  const { createUploadthing, createRouteHandler } =
-    await import("uploadthing/express");
-  const f = createUploadthing();
-  const uploadRouter = {
-    // Define as many FileRoutes as you like, each with a unique routeSlug
-    imageUploader: f({
-      image: {
-        /**
-         * For full list of options and defaults, see the File Route API reference
-         * @see https://docs.uploadthing.com/file-routes#route-config
-         */
-        maxFileSize: "4MB",
-        maxFileCount: 1,
-      },
-    }).onUploadComplete((data) => {
-      console.log("upload completed", data);
-    }),
-  };
-  app.use(
-    "/api/uploadthing",
-    createRouteHandler({
-      router: uploadRouter,
-      config: {},
-    }),
-  );
-})();
+app.use(cookieParser());
 
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
+function getSafeJson(value) {
+  return JSON.stringify(value)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 // app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -66,7 +33,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/s/:site/users", getValdFromParam, authRoutes);
 app.use("/s/:site/pins", getValdFromParam, pinRoutes);
 
-app.use(cookieParser());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
@@ -110,6 +76,7 @@ app.get(
   getAuth,
   getValdFromParam,
   function (req, res, next) {
+    res.clearCookie("token");
     res.render("logout", { title: "Express", user: req.user });
   },
 );
@@ -121,6 +88,13 @@ db.sequelize
   });
 
 app.post("/init", async function (req, res) {
+  if (
+    !process.env.INIT_SECRET ||
+    req.headers["x-init-secret"] !== process.env.INIT_SECRET
+  ) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
   const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
   const adminUser = {
     username: "admin",
@@ -134,10 +108,32 @@ app.post("/init", async function (req, res) {
   res.status(200).json({ success: true });
 });
 
-app.get("/s/:site/edit/:id", async function (req, res) {
-  const pin = await db.pins.findByPk(parseInt(req.params.id));
-  res.render("editFish", { pin, coords, site: req.params.site });
-});
+app.get(
+  "/s/:site/edit/:id",
+  getValdFromParam,
+  isAuth,
+  async function (req, res) {
+    const pin = await db.pins.findOne({
+      where: { id: parseInt(req.params.id), valdId: req.valdId },
+    });
+
+    if (!pin) {
+      return res.status(404).send("Fangsten finnes ikke");
+    }
+
+    const isOwner = pin.userId === req.user.id;
+    if (!isOwner && req.user.role !== "admin") {
+      return res.status(403).send("Ingen tilgang");
+    }
+
+    res.render("editFish", {
+      pin,
+      pinJson: getSafeJson(pin),
+      coords,
+      site: req.params.site,
+    });
+  },
+);
 
 app.get("/s/:site/login", getValdFromParam, function (req, res, next) {
   res.render("login", {
@@ -153,7 +149,7 @@ app.get("/s/:site/register", getValdFromParam, function (req, res, next) {
     site: req.params.site,
   });
 });
-app.get("/s/:site/submitFish", getValdFromParam, function (req, res, next) {
+app.get("/s/:site/submitFish", getValdFromParam, isAuth, function (req, res, next) {
   res.render("submitFish", {
     title: "Express",
     user: req.user,
@@ -162,7 +158,7 @@ app.get("/s/:site/submitFish", getValdFromParam, function (req, res, next) {
   });
 });
 
-app.get("/s/:site/addFish", getValdFromParam, function (req, res, next) {
+app.get("/s/:site/addFish", getValdFromParam, isAdmin, function (req, res, next) {
   res.render("addFish", {
     title: "Express",
     user: req.user,
@@ -171,7 +167,7 @@ app.get("/s/:site/addFish", getValdFromParam, function (req, res, next) {
   });
 });
 
-app.get("/s/:site/addFishUser", getValdFromParam, function (req, res, next) {
+app.get("/s/:site/addFishUser", getValdFromParam, isAuth, function (req, res, next) {
   res.render("addFishUser", {
     title: "Express",
     user: req.user,
@@ -185,22 +181,24 @@ app.get("/s/:site/pin/:id", getValdFromParam, async function (req, res) {
       where: {
         id: parseInt(req.params.id),
         valdId: req.valdId,
+        published: true,
       },
     });
 
     if (!pin) {
-      return res.status(404);
+      return res.status(404).send("Fangsten finnes ikke");
     }
 
     res.render("pinDetails", {
       pin,
+      pinJson: getSafeJson(pin),
       user: req.user,
       site: req.params.site,
       coords,
     });
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).send("Serverfeil");
   }
 });
 

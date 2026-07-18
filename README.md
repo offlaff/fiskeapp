@@ -72,7 +72,7 @@ DB_HOST=localhost
 DB_PORT=3306
 
 JWT_SECRET=your_jwt_secret
-SESSION_SECRET=your_session_secret
+INIT_SECRET=your_private_initialization_secret
 
 ADMIN_NAME=Admin
 ADMIN_EMAIL=admin@example.com

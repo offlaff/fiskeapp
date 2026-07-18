@@ -1,55 +1,82 @@
 const jwt = require("jsonwebtoken");
 const db = require("../db");
 
-function isAuth(req, res, next) {
+function getToken(req) {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const headerToken = authHeader && authHeader.split(" ")[1];
+
+  if (headerToken && headerToken !== "null" && headerToken !== "undefined") {
+    return headerToken;
+  }
+
+  return req.cookies?.token;
+}
+
+async function isAuth(req, res, next) {
+  const token = getToken(req);
 
   if (!token) {
     return res.status(401).json({ message: "Missing token" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: "Invalid token" });
+  try {
+    const userFromJWT = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await db.users.findByPk(parseInt(userFromJWT.id));
+
+    if (!user) {
+      return res.status(403).json({ message: "Invalid token" });
+    }
+
+    if (req.valdId && Number(user.valdId) !== Number(req.valdId)) {
+      return res.status(403).json({ message: "Wrong fishing area" });
+    }
 
     req.user = user;
-    next();
-  });
+    return next();
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid token" });
+  }
 }
 
 function getAuth(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = getToken(req);
 
   if (!token) {
     return next();
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    req.user = user;
-    next();
-  });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    req.user = null;
+  }
+  return next();
 }
 
-function isAdmin(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+async function isAdmin(req, res, next) {
+  const token = getToken(req);
 
   if (!token) {
     return res.status(401).json({ message: "Missing token" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, async (err, userFromJWT) => {
-    if (err) return res.status(403).json({ message: "Invalid token" });
+  try {
+    const userFromJWT = jwt.verify(token, process.env.JWT_SECRET);
     const user = await db.users.findByPk(parseInt(userFromJWT.id));
 
-    if (user.role !== "admin") {
+    if (!user || user.role !== "admin") {
       return res.status(403).json({ message: "Admin access required" });
     }
 
+    if (req.valdId && Number(user.valdId) !== Number(req.valdId)) {
+      return res.status(403).json({ message: "Wrong fishing area" });
+    }
+
     req.user = user;
-    next();
-  });
+    return next();
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid token" });
+  }
 }
 
 module.exports = { isAdmin, isAuth, getAuth };

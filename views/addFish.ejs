@@ -42,18 +42,19 @@
 
         pins.forEach((pin) => {
           const editButton = `<a href="/s/${site}/edit/${pin.id}" class="btn btn-warning btn-sm edit-btn" data-id="${pin.id}">Rediger</a>`;
+          const imageUrl = getSafeImageUrl(pin.image);
           const row = document.createElement("tr");
           row.innerHTML = `
-              <td>${pin.name}</td>
-              <td>${pin.weight}</td>
-              <td>${pin.length}</td>
-              <td>${pin.bait}</td>
-              <td>${pin.date}</td>
+              <td>${escapeHtml(pin.name)}</td>
+              <td>${escapeHtml(pin.weight)}</td>
+              <td>${escapeHtml(pin.length)}</td>
+              <td>${escapeHtml(pin.bait)}</td>
+              <td>${escapeHtml(pin.date)}</td>
               <td>
   ${
-    pin.image
-      ? `<a href="${pin.image}" target="_blank">
-           <img style="width: 75px; height: 75px; object-fit: contain;" src="${pin.image}">
+    imageUrl
+      ? `<a href="${escapeHtml(imageUrl)}" target="_blank" rel="noopener noreferrer">
+           <img style="width: 75px; height: 75px; object-fit: contain;" src="${escapeHtml(imageUrl)}">
          </a>`
       : "-"
   }

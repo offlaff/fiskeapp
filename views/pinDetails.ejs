@@ -24,7 +24,7 @@
   </div>
 
   <script>
-    const pin = <%- JSON.stringify(pin) %>;
+    const pin = <%- pinJson %>;
     console.log(pin);
 
     const site = "<%= site %>";
@@ -78,13 +78,14 @@
     function fishImage() {
       const fishPicture = document.querySelector(".fishPicture");
 
-      if (pin.image) {
+      const imageUrl = getSafeImageUrl(pin.image);
+      if (imageUrl) {
         const imgDiv = document.createElement("div");
         imgDiv.setAttribute("class", "imgBackDrop");
 
-        imgDiv.setAttribute("style", `background-image: url("${pin.image}")`);
+        imgDiv.style.backgroundImage = `url("${imageUrl}")`;
         const img = document.createElement("img");
-        img.src = pin.image;
+        img.src = imageUrl;
         img.alt = "Fish image";
         fishPicture.appendChild(img);
         fishPicture.appendChild(imgDiv);
@@ -100,27 +101,27 @@
       <tbody>
         <tr>
           <td><h1 class="h4">Vekt:</h1></td>
-          <td><h1 class="h4">${pin.weight}kg</h1></p>
+          <td><h1 class="h4">${escapeHtml(pin.weight)}kg</h1></p>
 </td>
         </tr>
         <tr>
           <td><p class="h6">Lengde:</p></td>
-          <td>    <p class="h6"> ${pin.length}cm</p>
+          <td>    <p class="h6"> ${escapeHtml(pin.length)}cm</p>
 </td>
         </tr>
         <tr>
           <td><p class="h6">Fisker:</p></td>
-          <td>    <p class="h6">${pin.name}</p>
+          <td>    <p class="h6">${escapeHtml(pin.name)}</p>
 </td>
         </tr>
         <tr>
           <td><p class="h6">Dato:</p></td>
-          <td>    <p class="h6"> ${pin.date}</p>
+          <td>    <p class="h6"> ${escapeHtml(pin.date)}</p>
 </td>
         </tr>
         <tr>
           <td><p class="h6">Agn:</p></td>
-          <td> <p class="h6"> ${pin.bait}  ${pin.baitInfo ? `(${pin.baitInfo})` : "" }</p>
+          <td> <p class="h6"> ${escapeHtml(pin.bait)}  ${pin.baitInfo ? `(${escapeHtml(pin.baitInfo)})` : "" }</p>
 </td>
         </tr>
       </tbody>

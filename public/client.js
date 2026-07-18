@@ -117,13 +117,13 @@ function addCard(pin) {
 
   const extraCatchInfo = document.createElement("span");
   extraCatchInfo.className = "h6";
-  extraCatchInfo.innerHTML = `${pin.length}cm - ${capitalizeFirstLetter(pin.bait)}
-    ${
-      pin.baitInfo
-        ? `<span class="text-muted">${capitalizeFirstLetter(pin.baitInfo)}</span>`
-        : ""
-    }
-  `;
+  extraCatchInfo.textContent = `${pin.length}cm - ${capitalizeFirstLetter(pin.bait)}`;
+  if (pin.baitInfo) {
+    const baitInfo = document.createElement("span");
+    baitInfo.className = "text-muted";
+    baitInfo.textContent = ` ${capitalizeFirstLetter(pin.baitInfo)}`;
+    extraCatchInfo.appendChild(baitInfo);
+  }
   if (user && user.role === "admin") {
     leftSide.appendChild(editBtn);
   }
@@ -132,12 +132,13 @@ function addCard(pin) {
   leftSide.appendChild(extraCatchInfo);
   const rightSide = document.createElement("div");
 
-  if (pin.image) {
+  const imageUrl = getSafeImageUrl(pin.image);
+  if (imageUrl) {
     const catchImage = document.createElement("div");
-    catchImage.style.backgroundImage = `url("${pin.image}")`;
+    catchImage.style.backgroundImage = `url("${imageUrl}")`;
 
     const imgSrc = document.createElement("img");
-    imgSrc.src = pin.image;
+    imgSrc.src = imageUrl;
 
     rightSide.appendChild(catchImage);
     rightSide.appendChild(imgSrc);
@@ -167,31 +168,32 @@ function addMarker(pin) {
   const formatted = new Intl.DateTimeFormat("no-NB", {
     dateStyle: "full",
   }).format(date);
+  const imageUrl = getSafeImageUrl(pin.image);
   marker.bindPopup(
     `<div style="display: flex; gap: 1rem; "> ${
-      pin.image
-        ? `<a href="${pin.image}" target="_blank">
-           <img style="width: 75px; height: 75px; object-fit: contain; margin: auto;" src="${pin.image}">
+      imageUrl
+        ? `<a href="${escapeHtml(imageUrl)}" target="_blank" rel="noopener noreferrer">
+           <img style="width: 75px; height: 75px; object-fit: contain; margin: auto;" src="${escapeHtml(imageUrl)}">
          </a>`
         : ""
     }
     <table class="popupTable"> 
      <tr>
         <td class="light-text">Vekt:</td>
-        <td><strong>${pin.weight}kg</strong></td>
+        <td><strong>${escapeHtml(pin.weight)}kg</strong></td>
         </tr>
         <tr>
         <td class="light-text">Lengde:</td>
-        <td>${pin.length}cm</td>
+        <td>${escapeHtml(pin.length)}cm</td>
         </tr>
        
         <tr>
         <td class="light-text">Agn:</td>
-        <td>${capitalizeFirstLetter(pin.bait)}</td>
+        <td>${escapeHtml(capitalizeFirstLetter(pin.bait))}</td>
         </tr>
         <tr>
         <td class="light-text">Fisker:</td>
-        <td>${pin.name}</td>
+        <td>${escapeHtml(pin.name)}</td>
         </tr>
         <tr>
         <td class="light-text">Dato:</td>

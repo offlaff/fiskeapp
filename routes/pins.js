@@ -1,7 +1,6 @@
 const express = require("express");
 const db = require("../db");
 
-const passport = require("passport");
 const router = express.Router();
 const PinService = require("../services/pinService");
 const { isAuth, isAdmin } = require("../middleware/auth");
@@ -10,8 +9,6 @@ const multer = require("multer");
 const path = require("path");
 
 const { uploadImage } = require("../cloudinary");
-const { getValdFromParam } = require("../middleware/vald");
-
 const imgStorage = multer.diskStorage({
   destination: "./public/images",
   filename: (req, file, cb) => {
@@ -22,7 +19,17 @@ const imgStorage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: imgStorage });
+const upload = multer({
+  storage: imgStorage,
+  limits: { fileSize: 4 * 1024 * 1024, fields: 20 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Only JPG and PNG images are allowed"));
+    }
+    cb(null, true);
+  },
+});
 
 router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
   let image;
@@ -86,9 +93,21 @@ router.get("/", async (req, res) => {
   res.json(result[0]);
 });
 
-router.delete("/:id", async function (req, res, next) {
-  const result = await pinService.deletePin(req.params.id);
-  if (result.error) return res.status(404).json(result);
+router.delete("/:id", isAuth, async function (req, res, next) {
+  const pin = await db.pins.findOne({
+    where: { id: req.params.id, valdId: req.valdId },
+  });
+
+  if (!pin) {
+    return res.status(404).json({ error: "Not found" });
+  }
+
+  const isOwner = pin.userId === req.user.id;
+  if (!isOwner && req.user.role !== "admin") {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  await pin.destroy();
 
   res.json({ message: "pin deleted" });
 });
@@ -104,7 +123,7 @@ router.get("/myPins", isAuth, async (req, res) => {
   }
 });
 
-router.get("/unpublished", async (req, res) => {
+router.get("/unpublished", isAdmin, async (req, res) => {
   const result = await db.sequelize.query(
     "select * from pins WHERE published = false AND valdId = :valdId;",
     { replacements: { valdId: req.valdId } },
@@ -138,7 +157,9 @@ router.patch(
       const user = await db.users.findByPk(req.user.id);
       const isAdmin = user.role === "admin";
 
-      const pin = await db.pins.findByPk(req.params.id);
+      const pin = await db.pins.findOne({
+        where: { id: req.params.id, valdId: req.valdId },
+      });
       if (!pin) {
         return res.status(404).json({ message: "pin not found" });
       }

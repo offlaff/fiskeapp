@@ -35,7 +35,7 @@ class AuthService {
   }
   createToken(user) {
     const token = jwt.sign(
-      { id: user.id, username: user.username },
+      { id: user.id, username: user.username, valdId: user.valdId },
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
@@ -60,10 +60,13 @@ class AuthService {
   }
 
   async loginUser(options) {
-    const { username, password } = options;
+    const { username, password, valdId } = options;
     try {
       const user = await db.users.findOne({
-        where: { [Op.or]: [{ username: username }, { email: username }] },
+        where: {
+          [Op.or]: [{ username: username }, { email: username }],
+          valdId,
+        },
       });
 
       if (!user) {

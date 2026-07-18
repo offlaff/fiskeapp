@@ -5,8 +5,6 @@ const db = require("../db");
 const AuthService = require("../services/authService");
 const authService = new AuthService();
 const { isAuth } = require("../middleware/auth");
-const passport = require("passport");
-const { getValdFromParam } = require("../middleware/vald");
 
 // lagre på hvilken side en bruker blir laget på
 // bruk samme middleware og /s/:site/users
@@ -41,13 +39,22 @@ router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const response = await authService.loginUser({ username, password });
+    const response = await authService.loginUser({
+      username,
+      password,
+      valdId: req.valdId,
+    });
     if (response.error) {
-      return res.status(500).json({ error: response.error });
+      return res.status(401).json({ error: response.error });
     } else {
+      res.cookie("token", response, {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 1000,
+      });
       return res.status(200).json({
         message: "Login successful",
-        token: response,
       });
     }
   } catch (err) {
@@ -57,7 +64,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/me", isAuth, async (req, res) => {
-  const user = await db.users.findByPk(req.user.id);
+  const user = req.user;
   return res.status(200).json({
     fullName: user.fullName,
     username: user.username,

@@ -57,7 +57,7 @@
               alert(data.error);
               return;
             }
-            localStorage.setItem("token", data.token);
+            localStorage.removeItem("token");
             window.location.href = "/s/<%= site %>/";
           });
         return false;
