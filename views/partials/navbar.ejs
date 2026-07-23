@@ -40,9 +40,7 @@
 
 <script>
   async function hideLoggedInElements() {
-    const response = await fetch("/s/<%= site %>/users/me", {
-      headers: { authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+    const response = await fetch("/s/<%= site %>/users/me");
     if (response.status !== 200) {
       document.querySelectorAll(".loggedIn").forEach((ele) => {
         return;

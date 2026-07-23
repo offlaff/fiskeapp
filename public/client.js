@@ -49,11 +49,7 @@ async function start() {
 start();
 
 async function getMe() {
-  const response = await myFetch("/users/me", {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
+  const response = await myFetch("/users/me");
   const data = await response.json();
   console.log(data);
   if (data.username) {
@@ -235,9 +231,6 @@ async function savePinToDatabase({
       credentials: "same-origin",
       mode: "cors",
       cache: "no-cache",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
       body: formData,
     });
 

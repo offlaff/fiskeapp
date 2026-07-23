@@ -84,20 +84,11 @@
     const zoomLevel = 15.5;
     let marker = null;
     window.onload = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        window.location.replace(`/s/${site}/login`);
-        return;
-      }
       await getMe();
     };
 
     async function getCurrentUser() {
-      const response = await fetch(`/s/${site}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(`/s/${site}/users/me`);
       const data = await response.json();
       console.log(data);
       return data;
@@ -147,9 +138,6 @@
       const response = await fetch(`/s/${site}/pins/add-pins/`, {
         method: "POST",
         body: formdata,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
       });
       const data = await response.json();
       console.log(data);

@@ -93,20 +93,11 @@
     const zoomLevel = 15.5;
     let markers = [];
     window.onload = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        window.location.replace("/login");
-        return;
-      }
       await getMe();
     };
 
     async function getCurrentUser() {
-      const response = await fetch(`/s/${site}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(`/s/${site}/users/me`);
       const data = await response.json();
       console.log(data);
       return data;
@@ -126,7 +117,7 @@
         }
       } else {
         console.log("is not logged in");
-        window.location.href = `/s/${site}login`
+        window.location.href = `/s/${site}/login`
       }
     }
 
@@ -158,9 +149,6 @@
       const response = await fetch(`/s/${site}/pins/edit/` + id, {
         method: "PATCH",
         body: formdata,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
       });
       const data = await response.json();
       if (data.success) {
