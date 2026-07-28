@@ -31,7 +31,27 @@ const upload = multer({
   },
 });
 
-router.post("/add-pins", isAuth, upload.single("image"), async (req, res) => {
+function handleImageUpload(req, res, next) {
+  upload.single("image")(req, res, (error) => {
+    if (!error) {
+      return next();
+    }
+
+    if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        success: false,
+        errors: [{ msg: "Bildet er for stort. Maksimal filstørrelse er 4 MB." }],
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      errors: [{ msg: error.message || "Bildet kunne ikke lastes opp." }],
+    });
+  });
+}
+
+router.post("/add-pins", isAuth, handleImageUpload, async (req, res) => {
   let image;
   const { lat, lng, length, weight, bait, name, date, baitInfo, speciesId } =
     req.body;

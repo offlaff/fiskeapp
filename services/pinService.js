@@ -83,16 +83,6 @@ class PinService {
         msg: "Agn må inkluderes",
       });
     }
-    if (Number.isNaN(Number(weight))) {
-      errorArray.push({
-        msg: "Vekt må kun være tall, Eks: 13,4",
-      });
-      if (Number.isNaN(Number(length))) {
-        errorArray.push({
-          msg: "Lengde må kun være tall, Eks: 104",
-        });
-      }
-    }
     return {
       success: errorArray.length === 0,
       errors: errorArray,
