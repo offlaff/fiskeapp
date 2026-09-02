@@ -22,7 +22,12 @@ module.exports = (sequelize, DataTypes) => {
   );
   users.associate = function (models) {
     users.hasMany(models.pins, {
-      foreignKey: "userId",
+      foreignKey: {
+        name: "userId",
+        allowNull: true,
+      },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     });
     users.belongsTo(models.vald, { foreignKey: "valdId" });
   };

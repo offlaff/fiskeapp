@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     userId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     speciesId: {
       type: DataTypes.INTEGER,
@@ -24,7 +24,12 @@ module.exports = (sequelize, DataTypes) => {
 
   pins.associate = function (models) {
     pins.belongsTo(models.users, {
-      foreignKey: "userId",
+      foreignKey: {
+        name: "userId",
+        allowNull: true,
+      },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     });
 
     pins.belongsTo(models.vald, {
